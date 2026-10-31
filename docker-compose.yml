@@ -1,0 +1,46 @@
+# Durable self-hosted PostgreSQL for Makrotik Share.
+#
+#   docker compose up -d
+#   cp .env.example .env        # then set the same password
+#
+# The volume keeps data across container restarts. The server flags below are
+# the important durability guarantees: fsync, synchronous_commit and
+# full_page_writes must stay ON for committed records to survive a crash.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: makrotik-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: makrotik
+      POSTGRES_USER: makrotik
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-now}
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    command:
+      - postgres
+      - -c
+      - fsync=on
+      - -c
+      - synchronous_commit=on
+      - -c
+      - full_page_writes=on
+      - -c
+      - wal_level=replica
+      - -c
+      - max_wal_senders=3
+      - -c
+      - checkpoint_completion_target=0.9
+      - -c
+      - shared_buffers=256MB
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - makrotik_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U makrotik -d makrotik"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  makrotik_pgdata:

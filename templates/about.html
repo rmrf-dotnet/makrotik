@@ -1,0 +1,56 @@
+{% extends "legal_base.html" %}
+
+{% block title %}About us — Makrotik Share{% endblock %}
+{% block head_meta %}
+  <meta name="description"
+    content="Makrotik Share is a simple, privacy-first file sharing service. Learn who we are and how we think about your files." />
+{% endblock %}
+{% block doc_section %}Company{% endblock %}
+{% block doc_title %}About us{% endblock %}
+
+{% block content %}
+<p class="legal-lead">
+  Makrotik Share exists for one reason: sending a file should not require an account,
+  a subscription, or handing over your life story. Pick a file, get a private link,
+  move on.
+</p>
+
+<h2>What we do</h2>
+<p>
+  We run a lightweight file-sharing service built in Bulgaria and available to anyone.
+  An upload gets an unguessable private link, streams straight to disk (up to
+  {{ max_upload_human }} per transfer), and is removed automatically when the transfer
+  expires. Signing up is entirely optional and only adds a personal dashboard for
+  tracking and deleting the files you send.
+</p>
+
+<h2>How we think</h2>
+<ul>
+  <li><strong>Anonymous by default.</strong> No account is needed to upload or download —
+    not for you, not for the person receiving the link.</li>
+  <li><strong>The link is the key.</strong> The only way to reach a file is its random
+    token. Keep it private and the file stays private.</li>
+  <li><strong>Less is more.</strong> We collect the minimum needed to run the service and
+    keep nothing longer than necessary. See our
+    <a href="{{ url_for('privacy') }}">Privacy Policy</a> for the details.</li>
+  <li><strong>You stay in control.</strong> Set an expiry when you upload, and delete a
+    file at any time from your dashboard or its link.</li>
+</ul>
+
+<h2>Made in Bulgaria</h2>
+<p>
+  {{ site_name }} is operated from Bulgaria, within the European Union. That means the
+  EU General Data Protection Regulation (GDPR) applies to us, and data protection is
+  supervised by the Bulgarian
+  <a href="https://www.cpdp.bg/en/" target="_blank" rel="noopener noreferrer">Commission
+  for Personal Data Protection (CPDP)</a>. You can read exactly what that means for you
+  on our <a href="{{ url_for('gdpr') }}">GDPR page</a>.
+</p>
+
+<h2>Get in touch</h2>
+<p>
+  Questions, feedback, or a takedown request? Email us at
+  <a href="mailto:{{ contact_email }}">{{ contact_email }}</a> and we will get back to
+  you as soon as we can.
+</p>
+{% endblock %}

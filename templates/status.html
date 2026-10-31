@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>System status — {{ site_name }}</title>
+  <meta name="description"
+    content="Live operational status of the {{ site_name }} servers: application, database, storage and uploads." />
+  <link rel="icon" href="{{ url_for('static', filename='branding/makrotik32x32.ico') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  {% include 'partials/_site_nav.html' %}
+
+  <main class="status">
+    <div class="status-wrap">
+      <a class="legal-back" href="{{ url_for('index') }}">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8.5 3L4.5 7l4 4" />
+        </svg>
+        Back to home
+      </a>
+
+      <div class="section-label">Service status</div>
+      <h1 class="legal-title">System status</h1>
+      <p class="legal-meta">
+        Last checked <span id="status-checked">{{ status.generated_display }}</span>
+        &middot; <a href="{{ url_for('status_json') }}">JSON</a> &middot; auto-refreshes every 30s
+      </p>
+
+      <div class="status-banner status-{{ status.overall }}" id="status-banner">
+        <span class="status-dot status-{{ status.overall }}"></span>
+        <div>
+          <div class="status-banner-title">
+            {% if status.overall == 'operational' %}All systems operational
+            {% elif status.overall == 'degraded' %}Some systems degraded
+            {% else %}Service disruption{% endif %}
+          </div>
+          <div class="status-banner-sub">
+            {% if status.overall == 'operational' %}
+              Every component is responding normally.
+            {% elif status.overall == 'degraded' %}
+              The service is up, but a component needs attention.
+            {% else %}
+              One or more components are unavailable. We are on it.
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <h2 class="status-h2">Components</h2>
+      <ul class="status-list">
+        {% for c in status.components %}
+        <li class="status-row">
+          <span class="status-dot status-{{ c.status }}"></span>
+          <span class="status-name">{{ c.name }}</span>
+          <span class="status-detail">{{ c.detail }}</span>
+          <span class="status-badge status-{{ c.status }}">{{ c.status }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+
+      <h2 class="status-h2">Storage</h2>
+      <div class="card storage-card">
+        <div class="meter-header">
+          <div>
+            <div class="meter-used">{{ status.meter.used_human }} <span class="meter-used-of">/ {{ status.meter.total_human }}</span></div>
+            <div class="meter-sub">
+              {{ status.meter.files_count }} stored file{{ '' if status.meter.files_count == 1 else 's' }}
+              &middot; {{ status.meter.files_human }} used by {{ site_name }}
+            </div>
+          </div>
+          <div class="meter-pct meter-pct-{{ status.meter.level }}">{{ status.meter.percent }}%</div>
+        </div>
+        <div class="meter meter-{{ status.meter.level }}">
+          <div class="meter-fill" style="width: {{ status.meter.percent }}%"></div>
+        </div>
+        <div class="meter-legend">
+          <span>{{ status.meter.used_human }} used</span>
+          <span>{{ status.meter.total_human }} {{ 'quota' if status.meter.mode == 'quota' else 'capacity' }}</span>
+        </div>
+      </div>
+
+      <h2 class="status-h2">Details</h2>
+      <div class="status-metrics">
+        <div class="status-metric">
+          <div class="status-metric-label">Uptime (this process)</div>
+          <div class="status-metric-value">{{ status.metrics.uptime_human }}</div>
+        </div>
+        <div class="status-metric">
+          <div class="status-metric-label">Max upload</div>
+          <div class="status-metric-value">{{ status.metrics.max_upload_human }}</div>
+        </div>
+        <div class="status-metric">
+          <div class="status-metric-label">Stored files</div>
+          <div class="status-metric-value">{{ status.metrics.stored_files }}</div>
+        </div>
+        <div class="status-metric">
+          <div class="status-metric-label">Disk free</div>
+          <div class="status-metric-value">{{ status.metrics.disk_free_human }}</div>
+        </div>
+        <div class="status-metric">
+          <div class="status-metric-label">Disk capacity</div>
+          <div class="status-metric-value">{{ status.metrics.disk_total_human }}</div>
+        </div>
+        <div class="status-metric">
+          <div class="status-metric-label">Runtime</div>
+          <div class="status-metric-value">Python {{ status.metrics.python }}</div>
+        </div>
+      </div>
+
+      <aside class="legal-disclaimer">
+        <strong>Something look wrong?</strong> This page reflects the live state of the
+        service. If you spot an issue, email
+        <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.
+      </aside>
+    </div>
+  </main>
+
+  {% include 'partials/_site_footer.html' %}
+
+  <script>
+    setTimeout(function () { window.location.reload(); }, 30000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Makrotik Share{% endblock %}</title>
+  <link rel="icon" href="{{ url_for('static', filename='branding/makrotik32x32.ico') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  {% block head %}{% endblock %}
+</head>
+<body class="auth-body">
+  <main class="auth-shell">
+    <a class="auth-brand" href="{{ url_for('index') }}">
+      <img src="{{ url_for('static', filename='branding/makrotik1201x208.png') }}" alt="Makrotik" />
+    </a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack auth-flash">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                {% if category == 'error' %}<circle cx="7" cy="7" r="5.5"/><path d="M7 4.5v3M7 10v.5"/>{% else %}<path d="M2.5 7.5l3 3 6-6.5"/>{% endif %}
+              </svg>
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+
+    {% block auth_foot %}
+    <p class="auth-foot">
+      <a href="{{ url_for('dashboard') }}">Continue without an account &rarr;</a>
+    </p>
+    {% endblock %}
+  </main>
+
+  <div class="toast-stack" id="toast-stack"></div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

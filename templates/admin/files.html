@@ -1,0 +1,107 @@
+{% extends "admin/base.html" %}
+{% block title %}Records &amp; files — Makrotik Admin{% endblock %}
+{% block topbar %}Records &amp; files{% endblock %}
+
+{% block content %}
+<header class="hero hero-compact admin-hero">
+  <p class="page-eyebrow">Control room / records</p>
+  <h1 class="page-title">Every file.<br /><strong>Every record.</strong></h1>
+  <p class="page-sub">
+    Nothing here disappears on its own. Expired or deleted files are archived
+    and can be restored. Permanent deletion requires typing the file token.
+  </p>
+</header>
+
+<section class="section">
+  <div class="admin-toolbar">
+    <div class="admin-filter-tabs">
+      {% for value, label in [('all', 'All records'), ('active', 'Active'), ('archived', 'Archived')] %}
+      <a class="admin-filter {% if status == value %}is-active{% endif %}"
+         href="{{ url_for('admin_files_page', status=value, q=query) }}">{{ label }}</a>
+      {% endfor %}
+    </div>
+    <form class="admin-search" method="get" action="{{ url_for('admin_files_page') }}">
+      <input type="hidden" name="status" value="{{ status }}" />
+      <input class="input admin-search-input" type="search" name="q" value="{{ query }}"
+             placeholder="Search name or token" />
+      <button class="btn btn-secondary btn-sm" type="submit">Search</button>
+    </form>
+  </div>
+
+  <div class="card admin-table-card">
+    {% if files %}
+    <div class="admin-table admin-files-table">
+      <div class="admin-tr admin-th">
+        <span>File</span><span>Owner</span><span>Size</span><span>Created</span><span>Status</span><span>Actions</span>
+      </div>
+      {% for f in files %}
+      <div class="admin-tr">
+        <div class="admin-file-cell">
+          <a class="admin-list-title" href="{{ f['share_url'] }}" target="_blank" rel="noopener">{{ f['name'] }}</a>
+          <span class="admin-mono admin-token">{{ f['token'] }}</span>
+          {% if f['tags'] %}
+          <span class="admin-tags">
+            {% for tag in f['tags'].split(',') %}
+            <span class="admin-chip">{{ tag.strip() }}</span>
+            {% endfor %}
+          </span>
+          {% endif %}
+        </div>
+        <span>{{ f['owner'] }}</span>
+        <span class="admin-mono">{{ f['size_human'] }}</span>
+        <span class="admin-mono">{{ f['created_at'].replace('T', ' ') }}</span>
+        <span>
+          {% if f['deleted_at'] %}
+          <span class="admin-status-pill is-archived">Archived</span>
+          <span class="admin-reason">{{ f['delete_reason'] or 'deleted' }}</span>
+          {% elif f['expires_at'] %}
+          <span class="admin-status-pill is-ok">Active</span>
+          <span class="admin-reason">expires {{ f['expires_at'].replace('T', ' ') }}</span>
+          {% else %}
+          <span class="admin-status-pill is-ok">Active</span>
+          <span class="admin-reason">never expires</span>
+          {% endif %}
+        </span>
+        <div class="admin-row-actions">
+          {% if f['deleted_at'] %}
+          <form method="post" action="{{ url_for('admin_restore_file', token=f['token']) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <button class="btn btn-secondary btn-sm" type="submit">Restore</button>
+          </form>
+          {% endif %}
+          <details class="admin-purge admin-tag-editor">
+            <summary class="btn btn-ghost btn-sm">Tags</summary>
+            <form method="post" action="{{ url_for('admin_file_tags', token=f['token']) }}"
+                  class="admin-purge-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+              <input class="input admin-confirm-input" type="text" name="tags"
+                     value="{{ f['tags'] }}" placeholder="project-x, 2026" />
+              <button class="btn btn-secondary btn-sm" type="submit">Save tags</button>
+            </form>
+          </details>
+          <details class="admin-purge">
+            <summary class="btn btn-danger btn-sm">Purge</summary>
+            <form method="post" action="{{ url_for('admin_purge_file', token=f['token']) }}"
+                  class="admin-purge-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+              <input class="input admin-confirm-input" type="text" name="confirm"
+                     placeholder="type {{ f['token'] }}" required />
+              <button class="btn btn-danger btn-sm" type="submit">Delete forever</button>
+            </form>
+          </details>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="admin-table-note">
+      Showing up to 300 records. Archived files remain on disk until explicitly purged.
+    </p>
+    {% else %}
+    <div class="empty">
+      <div class="empty-title">No records match</div>
+      <p class="empty-sub">Try a different filter or search term.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,22 @@
+<header class="landing-nav">
+  <a class="brand" href="{{ url_for('index') }}">
+    <img src="{{ url_for('static', filename='branding/makrotik1201x208.png') }}" alt="Makrotik" />
+  </a>
+
+  <nav class="landing-nav-links">
+    <a href="{{ url_for('index') }}#features">Features</a>
+    <a href="{{ url_for('index') }}#how">How it works</a>
+    <a href="{{ url_for('about') }}">About</a>
+    <a class="nav-status" href="{{ url_for('status') }}"><span class="status-dot status-operational"></span>Status</a>
+  </nav>
+
+  <div class="landing-nav-actions">
+    {% if current_user %}
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('my_files') }}">My files</a>
+      <a class="btn btn-primary btn-sm" href="{{ url_for('dashboard') }}">Open dashboard</a>
+    {% else %}
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('login') }}">Sign in</a>
+      <a class="btn btn-primary btn-sm" href="{{ url_for('register') }}">Create account</a>
+    {% endif %}
+  </div>
+</header>

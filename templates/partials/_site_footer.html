@@ -1,0 +1,62 @@
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-brand">
+      <img src="{{ url_for('static', filename='branding/makrotik1201x208.png') }}" alt="Makrotik Share" />
+      <p class="site-footer-tagline">
+        Anonymous file sharing with <em>optional</em> accounts. Drop a file up to
+        {{ max_upload_human }}, get a private link, and let it expire on its own.
+      </p>
+      <span class="site-footer-made">Made &amp; operated in Bulgaria</span>
+    </div>
+
+    <nav class="site-footer-col" aria-label="Product">
+      <h3>Product</h3>
+      <ul>
+        <li><a href="{{ url_for('dashboard') }}">Start uploading</a></li>
+        {% if current_user %}
+          <li><a href="{{ url_for('my_files') }}">My files</a></li>
+          <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+          <li><a href="{{ url_for('status') }}">Service status</a></li>
+        {% else %}
+          <li><a href="{{ url_for('register') }}">Create account</a></li>
+          <li><a href="{{ url_for('login') }}">Sign in</a></li>
+          <li><a href="{{ url_for('status') }}">Service status</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+
+    <nav class="site-footer-col" aria-label="Company">
+      <h3>Company</h3>
+      <ul>
+        <li><a href="{{ url_for('about') }}">About us</a></li>
+        <li><a href="{{ url_for('index') }}#how">How it works</a></li>
+        <li><a href="{{ url_for('index') }}#account">Accounts</a></li>
+        <li><a href="mailto:{{ contact_email }}">Contact</a></li>
+      </ul>
+    </nav>
+
+    <nav class="site-footer-col" aria-label="Legal">
+      <h3>Legal &amp; policies</h3>
+      <ul>
+        <li><a href="{{ url_for('privacy') }}">Privacy Policy</a></li>
+        <li><a href="{{ url_for('privacy') }}#cookies">Cookie Policy</a></li>
+        <li><a href="{{ url_for('terms') }}">Terms of Service</a></li>
+        <li><a href="{{ url_for('gdpr') }}">GDPR &amp; your rights</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="site-footer-bottom">
+    <span>&copy; {{ current_year }} {{ site_name }}. All rights reserved.</span>
+    <span class="site-footer-authority">
+      Data protection in Bulgaria is supervised by the
+      <a href="https://www.cpdp.bg/en/" target="_blank" rel="noopener noreferrer">Commission for Personal Data Protection (CPDP)</a>.
+    </span>
+    <nav class="site-footer-legal">
+      <a href="{{ url_for('status') }}">Status</a>
+      <a href="{{ url_for('privacy') }}">Privacy</a>
+      <a href="{{ url_for('terms') }}">Terms</a>
+      <a href="{{ url_for('gdpr') }}">GDPR</a>
+    </nav>
+  </div>
+</footer>

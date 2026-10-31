@@ -1,0 +1,83 @@
+{% extends "legal_base.html" %}
+
+{% block title %}Terms of Service — Makrotik Share{% endblock %}
+{% block head_meta %}
+  <meta name="description"
+    content="The rules for using Makrotik Share, a simple file-sharing service operated in Bulgaria." />
+{% endblock %}
+{% block doc_section %}Legal{% endblock %}
+{% block doc_title %}Terms of Service{% endblock %}
+
+{% block content %}
+<p class="legal-lead">
+  These Terms govern your use of {{ site_name }}. By uploading, downloading, or
+  otherwise using the service, you agree to them. If you do not agree, please do not use
+  the service.
+</p>
+
+<h2>1. The service</h2>
+<p>
+  {{ site_name }} lets you upload a file, obtain a private link, and share that link so
+  others can download the file. An account is not required; if you create one, you get a
+  dashboard for managing your transfers. Uploads are limited to
+  {{ max_upload_human }} per transfer.
+</p>
+
+<h2>2. Acceptable use</h2>
+<p>You are responsible for what you upload and share. You must not upload or share:</p>
+<ul>
+  <li>content that is unlawful, infringing, defamatory, or that you have no right to share;</li>
+  <li>malware, or content designed to harm or gain unauthorised access to systems;</li>
+  <li>child sexual abuse material, or content that exploits or endangers minors;</li>
+  <li>personal data of others that you are not permitted to disclose;</li>
+  <li>content prohibited by Bulgarian or EU law.</li>
+</ul>
+<p>
+  We may remove content and disable links that violate these Terms, and may suspend or
+  terminate accounts where necessary to protect the service or comply with the law.
+</p>
+
+<h2>3. Your content and your responsibility</h2>
+<p>
+  You keep all rights to your files. You grant us only the limited permission needed to
+  store, deliver, and expire them. Because links are private, <strong>you are responsible
+  for who you share them with</strong> — anyone holding the link can download the file.
+</p>
+
+<h2>4. Accounts</h2>
+<p>
+  If you register, keep your credentials secure and provide a working email address. You
+  are responsible for activity under your account. You may delete your account at any time
+  by contacting us.
+</p>
+
+<h2>5. Availability, expiry and deletion</h2>
+<p>
+  Files are removed when their chosen expiry passes, or when you delete them. We aim to
+  keep the service running smoothly but provide it on an "as is" and "as available" basis.
+  We may change, suspend, or discontinue features, and we are not liable for files lost
+  because a link expired or was deleted.
+</p>
+
+<h2>6. Limitation of liability</h2>
+<p>
+  To the extent permitted by law, {{ site_name }} is not liable for indirect or
+  consequential losses, loss of data, or loss of profits arising from your use of the
+  service. Nothing in these Terms limits liability that cannot be limited under applicable
+  law, including your mandatory rights as a consumer in the EU.
+</p>
+
+<h2>7. Governing law and disputes</h2>
+<p>
+  These Terms are governed by the laws of the Republic of Bulgaria, and the courts of
+  Bulgaria have jurisdiction, without affecting consumer protections you may be entitled
+  to in your country of residence. If you have a concern, contact us first at
+  <a href="mailto:{{ contact_email }}">{{ contact_email }}</a> so we can try to resolve it.
+</p>
+
+<h2>8. Changes</h2>
+<p>
+  We may update these Terms. Material changes will be reflected in the "last updated" date
+  above. Continuing to use the service after a change means you accept the updated Terms.
+</p>
+{% endblock %}

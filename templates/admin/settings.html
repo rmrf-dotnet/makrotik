@@ -1,0 +1,125 @@
+{% extends "admin/base.html" %}
+{% block title %}Settings — Makrotik Admin{% endblock %}
+{% block topbar %}Settings{% endblock %}
+
+{% block content %}
+<header class="hero hero-compact admin-hero">
+  <p class="page-eyebrow">Control room / configuration</p>
+  <h1 class="page-title">Deliberate<br /><strong>by default.</strong></h1>
+  <p class="page-sub">
+    Change the admin password, decide how long archived records are kept, and
+    review the durability posture of the database.
+  </p>
+</header>
+
+<section class="section admin-two-col">
+  <div class="admin-col">
+    <div class="section-label">Admin access</div>
+    <div class="card admin-panel">
+      <div class="admin-kicker">Signed in as</div>
+      <div class="admin-engine-title">{{ admin_username }}</div>
+      <div class="admin-chips admin-muted-top">
+        <span class="admin-chip"><span>role</span><strong>{{ admin_role_label }}</strong></span>
+        <span class="admin-chip"><span>2FA</span><strong>{{ 'enabled' if admin_account and admin_account.totp_enabled else 'off' }}</strong></span>
+      </div>
+      {% if admin_can('manage_settings') %}
+      {% if env_password %}
+      <div class="admin-inline-warn">
+        <code>MAKROTIK_ADMIN_PASSWORD</code> is set and overrides the stored
+        password. Change the environment variable and restart the app to rotate
+        it. The password form is hidden while the environment override is active.
+      </div>
+      {% else %}
+      <form method="post" action="{{ url_for('admin_change_password') }}" class="admin-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label class="field">
+          <span class="field-label">Current password</span>
+          <input class="input" type="password" name="current_password" autocomplete="current-password" required />
+        </label>
+        <label class="field">
+          <span class="field-label">New password</span>
+          <input class="input" type="password" name="new_password" autocomplete="new-password" minlength="10" required />
+        </label>
+        <label class="field">
+          <span class="field-label">Confirm new password</span>
+          <input class="input" type="password" name="confirm_password" autocomplete="new-password" minlength="10" required />
+        </label>
+        <button class="btn btn-primary" type="submit">Update password</button>
+      </form>
+      {% endif %}
+      {% else %}
+      <p class="admin-muted admin-muted-top">Your role can view settings but not change them.</p>
+      {% endif %}
+      <p class="admin-muted admin-muted-top">
+        {% if env_password %}
+        Password source: <code>MAKROTIK_ADMIN_PASSWORD</code> in <code>.env</code>.
+        {% else %}
+        First-run credentials: <code>{{ credentials_file }}</code>
+        {% endif %}
+      </p>
+      <div class="btn-row">
+        <a class="btn btn-secondary btn-sm" href="{{ url_for('admin_security_page') }}">Security &amp; 2FA</a>
+      </div>
+    </div>
+
+    <div class="section-label admin-label-spaced">Archive retention</div>
+    <div class="card admin-panel">
+      <p class="admin-muted">
+        Archived files are never removed automatically. This value is a policy
+        marker used by the purge action below; <strong>0 means never expire</strong>.
+      </p>
+      {% if admin_can('manage_settings') %}
+      <form method="post" action="{{ url_for('admin_set_retention') }}" class="admin-form admin-inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label class="field">
+          <span class="field-label">Retention (days)</span>
+          <input class="input" type="number" name="days" min="0" max="3650" value="{{ retention }}" />
+        </label>
+        <button class="btn btn-secondary" type="submit">Save</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="admin-col">
+    <div class="section-label">Database</div>
+    <div class="card admin-panel">
+      <dl class="admin-kv">
+        <div><dt>Engine</dt><dd>{{ 'PostgreSQL' if info['engine'] == 'postgres' else 'SQLite fallback' }}</dd></div>
+        <div><dt>Version</dt><dd>{{ info['version'] or '—' }}</dd></div>
+        <div><dt>Endpoint</dt><dd class="admin-mono">{{ info['url'] }}</dd></div>
+        <div><dt>Schema</dt><dd>v{{ info['schema_version'] or '—' }}</dd></div>
+        <div><dt>Database size</dt><dd>{{ info['size_human'] }}</dd></div>
+        <div><dt>Records</dt><dd>{{ storage['total_records'] }}</dd></div>
+        <div><dt>Archived</dt><dd>{{ storage['archived_count'] }} ({{ storage['archived_human'] }})</dd></div>
+      </dl>
+      {% if info['fallback_reason'] %}
+      <div class="admin-inline-error">{{ info['fallback_reason'] }}</div>
+      {% endif %}
+    </div>
+
+    {% if admin_can('manage_settings') %}
+    <div class="section-label admin-label-spaced">Danger zone</div>
+    <div class="card admin-panel admin-danger-panel">
+      <div class="admin-kicker">Permanent purge</div>
+      <p class="admin-muted">
+        This removes archived rows and their bytes forever. It is the only
+        operation that intentionally destroys data. Back up first.
+      </p>
+      <form method="post" action="{{ url_for('admin_purge_archived') }}" class="admin-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label class="field">
+          <span class="field-label">Purge archives older than (days; 0 = all)</span>
+          <input class="input" type="number" name="days" min="0" max="3650" value="{{ retention }}" />
+        </label>
+        <label class="field">
+          <span class="field-label">Type <code>purge</code> to confirm</span>
+          <input class="input" type="text" name="confirm" placeholder="purge" required />
+        </label>
+        <button class="btn btn-danger" type="submit">Permanently purge archives</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

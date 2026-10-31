@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{{ file.name }} — Makrotik Share{% endblock %}
+
+{% block content %}
+<header class="hero hero-compact">
+  <p class="page-eyebrow">Shared file</p>
+  <h1 class="page-title"><strong>{{ file.name }}</strong></h1>
+  <p class="page-sub">
+    Shared via Makrotik. No account needed to download — your file is ready
+    below.
+  </p>
+</header>
+
+<section class="section">
+  <div class="card file-card">
+    <div class="result-head">
+      <div>
+        <span class="card-badge">{{ file.size_human }}</span>
+        <div class="card-eyebrow">{{ file.mimetype or 'Unknown type' }}</div>
+        <div class="card-title">{{ file.name }}</div>
+      </div>
+    </div>
+    <div class="card-body">{{ file.size_human }} &middot; {{ file.downloads }} download{{ '' if file.downloads == 1 else 's' }}</div>
+
+    {% if file.mimetype and file.mimetype.startswith('image/') %}
+    <div class="preview">
+      <img src="{{ url_for('raw', token=file.token) }}" alt="{{ file.name }}" />
+    </div>
+    {% endif %}
+
+    <dl class="meta-list">
+      <div class="meta-row">
+        <dt>Uploaded</dt>
+        <dd>{{ file.created_at.replace('T', ' ') }} UTC</dd>
+      </div>
+      <div class="meta-row">
+        <dt>Expires</dt>
+        <dd>{{ (file.expires_at.replace('T', ' ') ~ ' UTC') if file.expires_at else 'Never' }}</dd>
+      </div>
+      <div class="meta-row">
+        <dt>Type</dt>
+        <dd>{{ file.mimetype or 'Unknown' }}</dd>
+      </div>
+    </dl>
+
+    <div class="result-actions">
+      <a class="btn btn-primary btn-lg" href="{{ url_for('download', token=file.token) }}">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7.5 2v8M4.5 7.5l3 3 3-3M2.5 13h10" />
+        </svg>
+        Download
+      </a>
+      <button class="btn btn-secondary copy-link" data-url="{{ file.share_url }}">
+        <svg width="14" height="14" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <rect x="5" y="5" width="7" height="7" rx="1.5" />
+          <path d="M3 10V3h7" />
+        </svg>
+        Copy link
+      </button>
+    </div>
+  </div>
+</section>
+
+<section class="section note-section">
+  <p class="note">
+    Shared anonymously or from a signed-in dashboard — either way, the link is
+    unguessable and expires automatically. Makrotik never requires you to sign up.
+  </p>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}

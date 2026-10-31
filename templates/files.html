@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}My files — Makrotik Share{% endblock %}
+
+{% block content %}
+<header class="hero hero-compact">
+  <p class="page-eyebrow">Dashboard / {{ current_user['username'] }}</p>
+  <h1 class="page-title"><strong>My files</strong></h1>
+  <p class="page-sub">
+    Every transfer you make while signed in is listed here. Anonymous uploads
+    don't appear — but their links keep working.
+  </p>
+</header>
+
+<section class="section stats-section">
+  <div class="grid-4">
+    <div class="card stat-card">
+      <div class="card-eyebrow">Active links</div>
+      <div class="stat-num">{{ stats['active'] }}</div>
+      <div class="stat-sub">not yet expired</div>
+    </div>
+    <div class="card stat-card">
+      <div class="card-eyebrow">Total shared</div>
+      <div class="stat-num">{{ stats['total_human'] }}</div>
+      <div class="stat-sub">across active files</div>
+    </div>
+    <div class="card stat-card">
+      <div class="card-eyebrow">Downloads</div>
+      <div class="stat-num">{{ stats['total_downloads'] }}</div>
+      <div class="stat-sub">lifetime count</div>
+    </div>
+    <div class="card stat-card">
+      <div class="card-eyebrow">Expiring soon</div>
+      <div class="stat-num">{{ stats['expiring'] }}</div>
+      <div class="stat-sub">within 24 hours</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-label">Disk drives</div>
+
+  {% if drives %}
+  <div class="drive-grid">
+    {% for d in drives %}
+    <div class="card drive-card">
+      <div class="drive-head">
+        <div class="drive-name-wrap">
+          <div class="drive-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="12" height="10" rx="2" />
+              <path d="M2 9h12" />
+              <circle cx="11.5" cy="11" r=".75" fill="currentColor" stroke="none" />
+            </svg>
+          </div>
+          <div>
+            <div class="drive-name">{{ d['name'] }}</div>
+            <div class="drive-mount mono">{{ d['mount'] }}</div>
+          </div>
+        </div>
+        <div class="drive-pct {% if d['level'] == 'high' %}meter-pct-high{% elif d['level'] == 'warn' %}meter-pct-warn{% endif %}">
+          {{ d['percent'] }}%
+        </div>
+      </div>
+      <div class="meter meter-{{ d['level'] }}">
+        <div class="meter-fill" style="width: {{ d['percent'] }}%"></div>
+      </div>
+      <div class="drive-stats">
+        <span><strong>{{ d['free_human'] }}</strong> free</span>
+        <span>{{ d['used_human'] }} of {{ d['total_human'] }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty card">
+    <div class="empty-title">No drives detected</div>
+    <p class="empty-sub">The server could not read any disk drives from this machine.</p>
+  </div>
+  {% endif %}
+</section>
+
+<section class="section">
+  <div class="section-label">Transfer history</div>
+
+  {% if files %}
+  <div class="file-table card">
+    <div class="file-row file-head">
+      <span>File</span>
+      <span>Size</span>
+      <span>Downloads</span>
+      <span>Expires</span>
+      <span>Actions</span>
+    </div>
+    {% for f in files %}
+    <div class="file-row">
+      <div class="file-name">
+        <div class="file-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8.5 2H4a1.5 1.5 0 0 0-1.5 1.5v9A1.5 1.5 0 0 0 4 14h8a1.5 1.5 0 0 0 1.5-1.5V6.5L8.5 2z" />
+            <path d="M8.5 2v4.5H13" />
+          </svg>
+        </div>
+        <div class="file-name-meta">
+          <a class="file-title" href="{{ f['share_url'] }}" target="_blank" rel="noopener">{{ f['name'] }}</a>
+          <div class="file-sub">{{ f['created_at'].replace('T', ' ') }} UTC</div>
+        </div>
+      </div>
+      <div class="file-size mono">{{ f['size_human'] }}</div>
+      <div class="file-downloads">{{ f['downloads'] }}</div>
+      <div class="file-expiry mono">
+        {% if f['expires_at'] %}{{ f['expires_at'].replace('T', ' ') }} UTC{% else %}Never{% endif %}
+      </div>
+      <div class="file-actions">
+        <button class="btn btn-secondary btn-sm copy-link" data-url="{{ f['share_url'] }}">
+          Copy
+        </button>
+        <button class="btn btn-danger btn-sm delete-file"
+                data-token="{{ f['token'] }}" data-name="{{ f['name'] }}"
+                data-delete-url="{{ url_for('delete_shared_file', token=f['token']) }}">
+          Delete
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty card">
+    <div class="empty-icon">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 15V5M8 8l3-3 3 3" />
+        <path d="M4 14v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" />
+      </svg>
+    </div>
+    <div class="empty-title">Nothing here yet</div>
+    <p class="empty-sub">Files you upload while signed in will be tracked here, automatically.</p>
+    <a class="btn btn-primary" href="{{ url_for('dashboard') }}">Upload a file</a>
+  </div>
+  {% endif %}
+</section>
+
+<div class="modal-overlay" id="delete-modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+    <div class="modal-icon">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <path d="M3 4.5h12M6.75 4.5v-1.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75v1.5M5.25 4.5l.75 10.5h6l.75-10.5" />
+      </svg>
+    </div>
+    <div class="modal-title" id="delete-modal-title">Delete this file permanently?</div>
+    <div class="modal-body">
+      <strong id="delete-modal-name"></strong> will be removed from disk and
+      the link will stop working immediately. This cannot be undone.
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="delete-cancel">Cancel</button>
+      <form method="post" id="delete-form" action="">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <button class="btn btn-danger" id="delete-confirm">Delete forever</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}

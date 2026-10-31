@@ -1,0 +1,155 @@
+{% extends "admin/base.html" %}
+{% block title %}Infrastructure — Makrotik Admin{% endblock %}
+{% block topbar %}Infrastructure{% endblock %}
+
+{% block content %}
+<header class="hero hero-compact admin-hero">
+  <p class="page-eyebrow">Control room / host health</p>
+  <h1 class="page-title">Know the host.<br /><strong>Before it fails.</strong></h1>
+  <p class="page-sub">
+    Live host, process, memory, disk and storage probes. These values are read
+    directly from the operating system and require no external monitoring agent.
+  </p>
+</header>
+
+{% if warnings %}
+<div class="admin-warnings">
+  {% for warning in warnings %}
+  <div class="admin-warning"><span>{{ warning }}</span></div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<section class="section">
+  <div class="grid-4">
+    <div class="card stat-card admin-stat">
+      <div class="card-eyebrow">Host uptime</div>
+      <div class="stat-num">{{ host.host_uptime }}</div>
+      <div class="stat-sub">{{ host.hostname }}</div>
+    </div>
+    <div class="card stat-card admin-stat">
+      <div class="card-eyebrow">CPU cores</div>
+      <div class="stat-num">{{ host.cpu_count }}</div>
+      <div class="stat-sub">load {{ host.load | join(' / ') if host.load else '—' }}</div>
+    </div>
+    <div class="card stat-card admin-stat">
+      <div class="card-eyebrow">Memory used</div>
+      <div class="stat-num">{{ host.memory.percent if host.memory else '—' }}{% if host.memory %}%{% endif %}</div>
+      <div class="stat-sub">{{ host.memory.used_human if host.memory else 'unavailable' }} of {{ host.memory.total_human if host.memory else '—' }}</div>
+    </div>
+    <div class="card stat-card admin-stat">
+      <div class="card-eyebrow">Process RSS</div>
+      <div class="stat-num">{{ host.process.rss_human }}</div>
+      <div class="stat-sub">pid {{ host.process.pid }} &middot; {{ host.process.uptime_human }}</div>
+    </div>
+  </div>
+</section>
+
+<section class="section admin-two-col">
+  <div class="admin-col">
+    <div class="section-label">Host</div>
+    <div class="card admin-panel">
+      <dl class="admin-kv">
+        <div><dt>Hostname</dt><dd>{{ host.hostname }}</dd></div>
+        <div><dt>Platform</dt><dd>{{ host.platform }}</dd></div>
+        <div><dt>System</dt><dd>{{ host.system }} {{ host.release }}</dd></div>
+        <div><dt>Machine</dt><dd>{{ host.machine }}</dd></div>
+        <div><dt>Processor</dt><dd>{{ host.processor }}</dd></div>
+        <div><dt>Python</dt><dd>{{ host.process.python }}</dd></div>
+        <div><dt>Executable</dt><dd class="admin-mono">{{ host.process.executable }}</dd></div>
+        <div><dt>Process start</dt><dd>{{ host.process.started_at.replace('T', ' ') }} UTC</dd></div>
+        <div><dt>Threads</dt><dd>{{ host.process.threads or '—' }}</dd></div>
+      </dl>
+    </div>
+
+    <div class="section-label admin-label-spaced">Memory</div>
+    <div class="card admin-panel">
+      {% if host.memory %}
+      <div class="meter-header">
+        <div>
+          <div class="meter-used">{{ host.memory.used_human }} <span class="meter-used-of">/ {{ host.memory.total_human }}</span></div>
+          <div class="meter-sub">{{ host.memory.available_human }} available</div>
+        </div>
+        <div class="meter-pct">{{ host.memory.percent }}%</div>
+      </div>
+      <div class="meter meter-{{ 'high' if host.memory.percent >= 90 else 'warn' if host.memory.percent >= 75 else 'ok' }}">
+        <div class="meter-fill" style="width: {{ host.memory.percent }}%"></div>
+      </div>
+      {% else %}
+      <p class="admin-muted">Memory statistics are unavailable on this platform.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="admin-col">
+    <div class="section-label">Database</div>
+    <div class="card admin-panel">
+      <dl class="admin-kv">
+        <div><dt>Engine</dt><dd>{{ 'PostgreSQL' if info.engine == 'postgres' else 'SQLite fallback' }}</dd></div>
+        <div><dt>Version</dt><dd>{{ info.version or '—' }}</dd></div>
+        <div><dt>Schema</dt><dd>v{{ info.schema_version or '—' }}</dd></div>
+        <div><dt>Size</dt><dd>{{ info.size_human }}</dd></div>
+        <div><dt>Connections</dt><dd>{{ info.connections }}</dd></div>
+        <div><dt>Endpoint</dt><dd class="admin-mono">{{ info.url }}</dd></div>
+      </dl>
+      {% if info.error %}<div class="admin-inline-error">{{ info.error }}</div>{% endif %}
+      {% if info.fallback_reason %}<div class="admin-inline-warn">{{ info.fallback_reason }}</div>{% endif %}
+    </div>
+
+    <div class="section-label admin-label-spaced">Storage paths</div>
+    <div class="card admin-panel">
+      {% for disk in host.disks %}
+      <div class="disk-row">
+        <div class="drive-head">
+          <div class="drive-name-wrap">
+            <div class="drive-name">{{ 'Uploads volume' if loop.index == 1 else 'Backups volume' }}</div>
+            <div class="drive-mount mono">{{ disk.path }}</div>
+          </div>
+          <div class="drive-pct">{{ disk.percent }}%</div>
+        </div>
+        <div class="meter meter-{{ 'high' if disk.percent >= 90 else 'warn' if disk.percent >= 75 else 'ok' }}">
+          <div class="meter-fill" style="width: {{ disk.percent }}%"></div>
+        </div>
+        <div class="drive-stats">
+          <span><strong>{{ disk.free_human }}</strong> free</span>
+          <span>{{ disk.used_human }} of {{ disk.total_human }}</span>
+        </div>
+      </div>
+      {% endfor %}
+      <div class="admin-divider"></div>
+      <dl class="admin-kv">
+        <div><dt>Uploads</dt><dd>{{ host.uploads.files }} files &middot; {{ host.uploads.size_human }}</dd></div>
+        <div><dt>Uploads writable</dt><dd>{{ 'yes' if host.uploads.writable else 'no' }}</dd></div>
+        <div><dt>Backups</dt><dd>{{ host.backups.files }} files &middot; {{ host.backups.size_human }}</dd></div>
+        <div><dt>Backups writable</dt><dd>{{ 'yes' if host.backups.writable else 'no' }}</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-label">Host volumes</div>
+  {% if drives %}
+  <div class="drive-grid">
+    {% for drive in drives %}
+    <div class="card drive-card">
+      <div class="drive-head">
+        <div class="drive-name-wrap">
+          <div class="drive-name">{{ drive.name }}</div>
+          <div class="drive-mount mono">{{ drive.mount }}</div>
+        </div>
+        <div class="drive-pct">{{ drive.percent }}%</div>
+      </div>
+      <div class="meter meter-{{ drive.level }}"><div class="meter-fill" style="width: {{ drive.percent }}%"></div></div>
+      <div class="drive-stats">
+        <span><strong>{{ drive.free_human }}</strong> free</span>
+        <span>{{ drive.used_human }} of {{ drive.total_human }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty card"><div class="empty-title">No volumes detected</div></div>
+  {% endif %}
+</section>
+{% endblock %}

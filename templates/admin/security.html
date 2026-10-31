@@ -1,0 +1,147 @@
+{% extends "admin/base.html" %}
+{% block title %}Security — Makrotik Admin{% endblock %}
+{% block topbar %}Security{% endblock %}
+
+{% block content %}
+<header class="hero hero-compact admin-hero">
+  <p class="page-eyebrow">Control room / account security</p>
+  <h1 class="page-title">Stronger sign-in.<br /><strong>Recovery ready.</strong></h1>
+  <p class="page-sub">
+    Add a time-based one-time password from any authenticator app. Recovery
+    codes are shown once and stored as hashes; each code can be used once.
+  </p>
+</header>
+
+{% if new_recovery_codes %}
+<section class="section">
+  <div class="section-label">Save these recovery codes now</div>
+  <div class="card admin-panel admin-recovery-panel">
+    <p class="admin-muted">
+      These codes will not be shown again. Store them offline in a password
+      manager or safe. Each code works once if you lose your authenticator.
+    </p>
+    <div class="recovery-grid">
+      {% for code in new_recovery_codes %}
+      <code>{{ code }}</code>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section admin-two-col">
+  <div class="admin-col">
+    <div class="section-label">Two-factor authentication</div>
+    <div class="card admin-panel">
+      <div class="admin-panel-head">
+        <div>
+          <div class="admin-kicker">Authenticator app</div>
+          <div class="admin-engine-title">
+            <span class="admin-engine-dot {{ 'is-pg' if security_account.totp_enabled else 'is-sqlite' }}"></span>
+            {{ 'Enabled' if security_account.totp_enabled else 'Not enabled' }}
+          </div>
+        </div>
+        <span class="admin-status-pill {{ 'is-ok' if security_account.totp_enabled else 'is-archived' }}">
+          {{ 'Protected' if security_account.totp_enabled else 'Password only' }}
+        </span>
+      </div>
+
+      {% if pending_secret %}
+      <div class="admin-inline-warn">
+        Scan or import this secret in your authenticator, then enter the current
+        6-digit code to finish setup. The secret is not active until you verify it.
+      </div>
+      <dl class="admin-kv">
+        <div><dt>Secret</dt><dd class="admin-mono admin-secret">{{ pending_secret }}</dd></div>
+        <div><dt>Provisioning URI</dt><dd class="admin-mono admin-truncate" title="{{ provisioning_uri }}">{{ provisioning_uri }}</dd></div>
+      </dl>
+      <form method="post" action="{{ url_for('admin_enable_2fa') }}" class="admin-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label class="field">
+          <span class="field-label">Current 6-digit code</span>
+          <input class="input" type="text" name="totp_code" inputmode="numeric" autocomplete="one-time-code" required />
+        </label>
+        <button class="btn btn-primary" type="submit">Verify and enable 2FA</button>
+      </form>
+      {% elif security_account.totp_enabled %}
+      <p class="admin-muted">
+        Sign-in now requires your password plus a current authenticator code.
+        Keep at least one recovery code somewhere safe.
+      </p>
+      <div class="btn-row admin-muted-top">
+        <form method="post" action="{{ url_for('admin_regenerate_recovery_codes') }}" class="admin-form admin-inline-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+          <label class="field">
+            <span class="field-label">Current password</span>
+            <input class="input" type="password" name="password" autocomplete="current-password" required />
+          </label>
+          <button class="btn btn-secondary" type="submit">New recovery codes</button>
+        </form>
+      </div>
+      <div class="admin-divider"></div>
+      <form method="post" action="{{ url_for('admin_disable_2fa') }}" class="admin-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label class="field">
+          <span class="field-label">Current password</span>
+          <input class="input" type="password" name="password" autocomplete="current-password" required />
+        </label>
+        <label class="field">
+          <span class="field-label">Authenticator or recovery code</span>
+          <input class="input" type="text" name="totp_code" autocomplete="one-time-code" required />
+        </label>
+        <button class="btn btn-danger" type="submit">Disable 2FA</button>
+      </form>
+      {% else %}
+      <p class="admin-muted">
+        Two-factor authentication is optional but strongly recommended for every
+        admin account, especially super admins.
+      </p>
+      <form method="post" action="{{ url_for('admin_start_2fa') }}" class="admin-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <button class="btn btn-primary" type="submit">Set up authenticator</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="admin-col">
+    <div class="section-label">Your account</div>
+    <div class="card admin-panel">
+      <dl class="admin-kv">
+        <div><dt>Username</dt><dd>{{ security_account.username }}</dd></div>
+        <div><dt>Role</dt><dd>{{ admin_role_label }}</dd></div>
+        <div><dt>Created</dt><dd>{{ security_account.created_at.replace('T', ' ') }} UTC</dd></div>
+        <div><dt>Last login</dt><dd>{{ security_account.last_login_at.replace('T', ' ') if security_account.last_login_at else '—' }}</dd></div>
+        <div><dt>Recovery codes</dt><dd>{{ 'configured' if security_account.recovery_codes else 'none' }}</dd></div>
+      </dl>
+    </div>
+
+    <div class="section-label admin-label-spaced">Your sessions</div>
+    <div class="card admin-panel">
+      {% if sessions %}
+      <ul class="admin-list">
+        {% for item in sessions %}
+        <li>
+          <div>
+            <div class="admin-list-title">{{ item.ip or 'unknown IP' }}</div>
+            <div class="admin-list-sub">
+              {{ item.last_seen.replace('T', ' ') }} UTC
+              {% if item.id == current_token %} &middot; this session{% endif %}
+            </div>
+          </div>
+          <span class="admin-status-pill {{ 'is-down' if item.revoked_at else 'is-ok' }}">
+            {{ 'revoked' if item.revoked_at else 'active' }}
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% if admin_can('manage_sessions') %}
+      <a class="btn btn-ghost btn-sm admin-full-btn" href="{{ url_for('admin_sessions_page') }}">Manage all sessions</a>
+      {% endif %}
+      {% else %}
+      <p class="admin-muted">No session records found.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

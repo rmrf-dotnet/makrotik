@@ -1,0 +1,247 @@
+{% extends "admin/base.html" %}
+{% block title %}Backups — Makrotik Admin{% endblock %}
+{% block topbar %}Backups{% endblock %}
+
+{% block content %}
+<header class="hero hero-compact admin-hero">
+  <p class="page-eyebrow">Control room / recovery</p>
+  <h1 class="page-title">Backups are the<br /><strong>last line of defence.</strong></h1>
+  <p class="page-sub">
+    Backups are written to <code>backups/</code> first, then delivered to the
+    configured targets. SQLite uses the online backup API; PostgreSQL uses
+    <code>pg_dump</code> custom-format archives. Verify a backup before trusting
+    it with a restore.
+  </p>
+</header>
+
+<section class="section">
+  <div class="admin-toolbar">
+    <div class="admin-kicker">Available backups</div>
+    <div class="btn-row">
+      {% if can_manage %}
+      <form method="post" action="{{ url_for('admin_run_due_backups') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <button class="btn btn-ghost" type="submit">Run due schedules</button>
+      </form>
+      <form method="post" action="{{ url_for('admin_create_backup') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <button class="btn btn-primary" type="submit">
+          <svg width="14" height="14" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7.5 2v8M4.5 7.5l3 3 3-3M2.5 12.5h10" />
+          </svg>
+          Create backup now
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card admin-panel">
+    {% if backups %}
+    <ul class="admin-list admin-backup-list">
+      {% for b in backups %}
+      <li>
+        <div>
+          <a class="admin-list-title" href="{{ url_for('admin_download_backup', name=b.name) }}">{{ b.name }}</a>
+          <div class="admin-list-sub">{{ b.kind }} &middot; {{ b.size_human }}</div>
+        </div>
+        <div class="admin-backup-meta">
+          <span class="admin-list-meta">{{ b.created_at }} UTC</span>
+          {% if can_manage %}
+          <form method="post" action="{{ url_for('admin_test_backup', name=b.name) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <button class="btn btn-ghost btn-sm" type="submit">Verify</button>
+          </form>
+          {% endif %}
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_download_backup', name=b.name) }}">Download</a>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty">
+      <div class="empty-title">No backups yet</div>
+      <p class="empty-sub">Create the first backup before changing anything.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section admin-two-col">
+  <div class="admin-col">
+    <div class="section-label">Targets</div>
+    <div class="card admin-panel">
+      {% if targets %}
+      <ul class="admin-list">
+        {% for target in targets %}
+        <li>
+          <div>
+            <div class="admin-list-title">{{ target.name }}</div>
+            <div class="admin-list-sub">
+              {{ target.kind }}
+              {% if target.config_data.path %} &middot; {{ target.config_data.path }}{% endif %}
+              {% if target.config_data.bucket %} &middot; {{ target.config_data.bucket }}{% endif %}
+              {% if target.config_data.host %} &middot; {{ target.config_data.host }}{% endif %}
+            </div>
+          </div>
+          <div class="admin-backup-meta">
+            <span class="admin-status-pill {{ 'is-ok' if target.enabled else 'is-archived' }}">{{ 'enabled' if target.enabled else 'paused' }}</span>
+            {% if can_manage %}
+            <form method="post" action="{{ url_for('admin_delete_backup_target', target_id=target.id) }}"
+                  onsubmit="return confirm('Delete this backup target?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+              <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+            </form>
+            {% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="admin-muted">No external targets. Backups stay in <code>backups/</code> only.</p>
+      {% endif %}
+
+      {% if can_manage %}
+      <div class="admin-divider"></div>
+      <div class="admin-kicker">Add target</div>
+      <form method="post" action="{{ url_for('admin_create_backup_target') }}" class="admin-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label class="field">
+          <span class="field-label">Name</span>
+          <input class="input" type="text" name="name" required />
+        </label>
+        <label class="field">
+          <span class="field-label">Kind</span>
+          <select class="input" name="kind">
+            <option value="local">Local directory</option>
+            <option value="s3">S3-compatible bucket</option>
+            <option value="sftp">SFTP server</option>
+          </select>
+        </label>
+        <div class="admin-form-grid">
+          <label class="field"><span class="field-label">Local path</span><input class="input" type="text" name="path" placeholder="/mnt/backup/makrotik" /></label>
+          <label class="field"><span class="field-label">S3 bucket</span><input class="input" type="text" name="bucket" /></label>
+          <label class="field"><span class="field-label">S3 prefix</span><input class="input" type="text" name="prefix" placeholder="makrotik" /></label>
+          <label class="field"><span class="field-label">S3 region</span><input class="input" type="text" name="region" /></label>
+          <label class="field"><span class="field-label">S3 endpoint URL</span><input class="input" type="text" name="endpoint_url" placeholder="https://…" /></label>
+          <label class="field"><span class="field-label">SFTP host</span><input class="input" type="text" name="host" /></label>
+          <label class="field"><span class="field-label">SFTP port</span><input class="input" type="number" name="port" value="22" /></label>
+          <label class="field"><span class="field-label">SFTP username</span><input class="input" type="text" name="username" /></label>
+          <label class="field"><span class="field-label">SFTP password</span><input class="input" type="password" name="password" autocomplete="new-password" /></label>
+          <label class="field"><span class="field-label">SFTP key path</span><input class="input" type="text" name="key_path" /></label>
+          <label class="field"><span class="field-label">SFTP remote path</span><input class="input" type="text" name="remote_path" value="/" /></label>
+        </div>
+        <p class="admin-muted">
+          S3 needs <code>boto3</code>; SFTP needs <code>paramiko</code>. If a
+          dependency is missing, the backup stays local and the run records the
+          delivery error.
+        </p>
+        <button class="btn btn-secondary" type="submit">Add target</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="admin-col">
+    <div class="section-label">Schedules</div>
+    <div class="card admin-panel">
+      {% if schedules %}
+      <ul class="admin-list">
+        {% for schedule in schedules %}
+        <li>
+          <div>
+            <div class="admin-list-title">{{ schedule.name }}</div>
+            <div class="admin-list-sub">
+              every {{ schedule.interval_minutes }} min &middot; keep {{ schedule.retention_days }} days
+              &middot; {{ schedule.target_name or 'local only' }}
+            </div>
+            <div class="admin-list-sub">
+              next {{ schedule.next_run_at.replace('T', ' ') if schedule.next_run_at else '—' }}
+              {% if schedule.last_run_at %} &middot; last {{ schedule.last_run_at.replace('T', ' ') }}{% endif %}
+            </div>
+          </div>
+          <div class="admin-backup-meta">
+            <span class="admin-status-pill {{ 'is-ok' if schedule.enabled else 'is-archived' }}">{{ 'on' if schedule.enabled else 'paused' }}</span>
+            {% if can_manage %}
+            <form method="post" action="{{ url_for('admin_toggle_backup_schedule', schedule_id=schedule.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+              <button class="btn btn-ghost btn-sm" type="submit">{{ 'Pause' if schedule.enabled else 'Enable' }}</button>
+            </form>
+            <form method="post" action="{{ url_for('admin_delete_backup_schedule', schedule_id=schedule.id) }}"
+                  onsubmit="return confirm('Delete this schedule?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+              <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+            </form>
+            {% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="admin-muted">No scheduled backups. Add one to make recovery automatic.</p>
+      {% endif %}
+
+      {% if can_manage %}
+      <div class="admin-divider"></div>
+      <div class="admin-kicker">Add schedule</div>
+      <form method="post" action="{{ url_for('admin_create_backup_schedule') }}" class="admin-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label class="field"><span class="field-label">Name</span><input class="input" type="text" name="name" placeholder="Nightly database backup" required /></label>
+        <label class="field">
+          <span class="field-label">Target</span>
+          <select class="input" name="target_id">
+            <option value="">Local backups/ only</option>
+            {% for target in targets %}
+            <option value="{{ target.id }}">{{ target.name }} ({{ target.kind }})</option>
+            {% endfor %}
+          </select>
+        </label>
+        <div class="admin-form-grid">
+          <label class="field"><span class="field-label">Every (minutes)</span><input class="input" type="number" name="interval_minutes" min="5" value="1440" required /></label>
+          <label class="field"><span class="field-label">Keep (days)</span><input class="input" type="number" name="retention_days" min="0" value="30" required /></label>
+        </div>
+        <button class="btn btn-secondary" type="submit">Add schedule</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-label">Recent backup runs</div>
+  <div class="card admin-table-card">
+    {% if runs %}
+    <div class="admin-table admin-runs-table">
+      <div class="admin-tr admin-th"><span>When</span><span>Backup</span><span>Status</span><span>Detail</span></div>
+      {% for run in runs %}
+      <div class="admin-tr">
+        <span class="admin-mono">{{ run.started_at.replace('T', ' ') }}</span>
+        <span class="admin-mono">{{ run.backup_name or '—' }}</span>
+        <span><span class="admin-status-pill {{ 'is-ok' if run.status in ['ok', 'verified'] else 'is-down' }}">{{ run.status }}</span></span>
+        <span class="admin-truncate" title="{{ run.detail }}">{{ run.detail }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="admin-muted admin-table-note">No scheduled or verification runs recorded yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="admin-note-grid">
+    <div class="card admin-note">
+      <div class="admin-kicker">PostgreSQL restore</div>
+      <p class="admin-muted">Restore into a fresh database, verify it, then point the app at it:</p>
+      <pre class="admin-code">pg_restore --clean --if-exists --no-owner \
+  -d postgresql://USER@HOST/makrotik backups/FILE.dump</pre>
+    </div>
+    <div class="card admin-note">
+      <div class="admin-kicker">What is covered</div>
+      <p class="admin-muted">
+        Database backups cover accounts, file records, archive state, lifecycle
+        rules, traffic events and the audit log. Uploaded bytes live in
+        <code>uploads/</code> and must be copied separately.
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

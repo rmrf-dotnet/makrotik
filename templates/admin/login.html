@@ -1,0 +1,53 @@
+{% extends "auth_base.html" %}
+{% block title %}Admin sign in — Makrotik Share{% endblock %}
+
+{% block content %}
+<div class="auth-card card admin-login-card">
+  <header class="auth-head">
+    <p class="page-eyebrow">Restricted area</p>
+    <h1 class="auth-title">Admin control room</h1>
+    <p class="auth-sub">
+      This dashboard controls the durable database, archives, backups and
+      audit trail. Only administrators can enter.
+    </p>
+  </header>
+
+  <form method="post" class="auth-form" action="{{ url_for('admin_login') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <input type="hidden" name="next" value="{{ next }}" />
+    <label class="field">
+      <span class="field-label">Admin username</span>
+      <input class="input" type="text" name="username" autocomplete="username"
+             value="{{ login_username or request.form.get('username', '') }}" required />
+    </label>
+    <label class="field">
+      <span class="field-label">Password</span>
+      <input class="input" type="password" name="password"
+             autocomplete="current-password" required />
+    </label>
+    {% if needs_totp %}
+    <label class="field">
+      <span class="field-label">Authenticator or recovery code</span>
+      <input class="input" type="text" name="totp_code" inputmode="numeric"
+             autocomplete="one-time-code" placeholder="123 456 or XXXXX-XXXXX"
+             autofocus required />
+    </label>
+    {% endif %}
+    <button type="submit" class="btn btn-primary btn-lg auth-submit">
+      {{ 'Verify and enter' if needs_totp else 'Enter control room' }}
+    </button>
+  </form>
+
+  <p class="auth-note">
+    Credentials are generated on first start and written to
+    <code>instance/admin_credentials.txt</code>. Set
+    <code>MAKROTIK_ADMIN_PASSWORD</code> to override them.
+  </p>
+</div>
+{% endblock %}
+
+{% block auth_foot %}
+<p class="auth-foot">
+  <a href="{{ url_for('index') }}">&larr; Back to Makrotik Share</a>
+</p>
+{% endblock %}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Makrotik Share{% endblock %}</title>
+  {% block head_meta %}{% endblock %}
+  <link rel="icon" href="{{ url_for('static', filename='branding/makrotik32x32.ico') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  {% include 'partials/_site_nav.html' %}
+
+  <main class="legal">
+    <div class="legal-wrap">
+      <a class="legal-back" href="{{ url_for('index') }}">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8.5 3L4.5 7l4 4" />
+        </svg>
+        Back to home
+      </a>
+
+      <div class="section-label">{% block doc_section %}Legal{% endblock %}</div>
+      <h1 class="legal-title">{% block doc_title %}Legal{% endblock %}</h1>
+      <p class="legal-meta">
+        Last updated <time datetime="{{ legal_updated_iso }}">{{ legal_updated }}</time>
+        &middot; {{ site_name }}
+      </p>
+
+      <article class="legal-body">
+        {% block content %}{% endblock %}
+      </article>
+
+      <aside class="legal-disclaimer">
+        <strong>Please note.</strong> This document is provided as a starting template
+        for {{ site_name }} and is not legal advice. Laws and regulatory guidance change,
+        so have it reviewed by a qualified lawyer (and, where relevant, a Bulgarian
+        data-protection specialist) before relying on it for a production service.
+        Questions? Write to <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.
+      </aside>
+    </div>
+  </main>
+
+  {% include 'partials/_site_footer.html' %}
+</body>
+</html>

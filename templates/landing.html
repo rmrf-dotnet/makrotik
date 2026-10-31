@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Makrotik Share — Share big files, no account needed</title>
+  <meta name="description"
+    content="Drop a file up to {{ max_upload_human }}, get a private link, and it wipes itself when it expires. No account required." />
+  <link rel="icon" href="{{ url_for('static', filename='branding/makrotik32x32.ico') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  {% include 'partials/_site_nav.html' %}
+
+  <main class="landing">
+    <section class="landing-hero landing-wrap">
+      <div>
+        <span class="landing-eyebrow">Anonymous file sharing</span>
+        <h1 class="landing-title">Share big files.<br /><strong>No account needed.</strong></h1>
+        <p class="landing-sub">
+          Drop a file up to {{ max_upload_human }}, get a private unguessable link, and
+          let it wipe itself when it expires. Create a free account only when you want
+          a dashboard to track your transfers.
+        </p>
+        <div class="landing-hero-actions">
+          <a class="btn btn-primary btn-lg" href="{{ url_for('dashboard') }}">Start uploading</a>
+          <a class="btn btn-secondary btn-lg" href="#how">See how it works</a>
+        </div>
+        <ul class="landing-points">
+          <li>Up to {{ max_upload_human }} per transfer</li>
+          <li>Unguessable private links</li>
+          <li>Links expire automatically</li>
+        </ul>
+      </div>
+
+      <div class="landing-shot">
+        <div class="browser-frame">
+          <div class="browser-bar"><span></span><span></span><span></span></div>
+          <img src="{{ url_for('static', filename='branding/screenshots/dashboard.png') }}"
+            alt="Makrotik Share dashboard" loading="lazy" />
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-strip">
+      <div class="landing-wrap">
+        <div class="landing-strip-grid">
+          <div class="landing-stat">
+            <div class="landing-stat-num">{{ max_upload_human }}</div>
+            <div class="landing-stat-label">Per transfer</div>
+          </div>
+          <div class="landing-stat">
+            <div class="landing-stat-num">0</div>
+            <div class="landing-stat-label">Accounts required</div>
+          </div>
+          <div class="landing-stat">
+            <div class="landing-stat-num">64-bit</div>
+            <div class="landing-stat-label">Private link tokens</div>
+          </div>
+          <div class="landing-stat">
+            <div class="landing-stat-num">Auto</div>
+            <div class="landing-stat-label">Expiry cleanup</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section landing-wrap" id="features">
+      <div class="landing-section-head">
+        <div class="section-label">Features</div>
+        <h2 class="landing-section-title">Everything to move a file, nothing you don't need.</h2>
+        <p class="landing-section-sub">
+          Built for the fastest path between two people: pick a file, set an expiry, share
+          the link. The rest is optional.
+        </p>
+      </div>
+
+      <div class="landing-features">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 14V4M6.5 7.5L10 4l3.5 3.5" />
+              <path d="M3.5 13v2.5A1.5 1.5 0 0 0 5 17h10a1.5 1.5 0 0 0 1.5-1.5V13" />
+            </svg>
+          </div>
+          <div class="feature-title">Big files, streamed straight to disk</div>
+          <p class="feature-body">
+            Send a single file up to {{ max_upload_human }} without loading it into memory.
+            Progress, speed and ETA are shown live while it uploads.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="9" width="12" height="8" rx="2" />
+              <path d="M6.5 9V6.5a3.5 3.5 0 0 1 7 0V9" />
+            </svg>
+          </div>
+          <div class="feature-title">Private, unguessable links</div>
+          <p class="feature-body">
+            Every upload gets a unique token link. Only people you share it with can find
+            the file — no public listing, no guessable URLs.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="10" cy="10" r="7" />
+              <path d="M10 6.5V10l2.5 1.5" />
+            </svg>
+          </div>
+          <div class="feature-title">Set it and forget it</div>
+          <p class="feature-body">
+            Choose an expiry from an hour to never. Expired transfers are wiped from disk
+            automatically, so nothing lingers longer than you want.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section landing-wrap" id="account">
+      <div class="landing-split">
+        <div>
+          <div class="section-label">Optional account</div>
+          <h2 class="landing-section-title">Go further than a link.</h2>
+          <p class="landing-section-sub" style="margin-bottom: 26px;">
+            Sharing never asks you to sign up. Create a free account only if you want a
+            personal dashboard of everything you've sent.
+          </p>
+          <div class="landing-steps">
+            <div class="landing-step">
+              <div class="landing-step-num">1</div>
+              <div>
+                <div class="landing-step-title">Track every transfer</div>
+                <div class="landing-step-body">See active links, total shared size and download counts at a glance.</div>
+              </div>
+            </div>
+            <div class="landing-step">
+              <div class="landing-step-num">2</div>
+              <div>
+                <div class="landing-step-title">Delete on your terms</div>
+                <div class="landing-step-body">Remove a file instantly from your dashboard — the link stops working at once.</div>
+              </div>
+            </div>
+            <div class="landing-step">
+              <div class="landing-step-num">3</div>
+              <div>
+                <div class="landing-step-title">Sign in by username or email</div>
+                <div class="landing-step-body">Register once with an email and manage everything from one place.</div>
+              </div>
+            </div>
+          </div>
+          <div class="landing-hero-actions" style="margin-top: 30px;">
+            <a class="btn btn-primary" href="{{ url_for('register') }}">Create free account</a>
+            <a class="btn btn-ghost" href="{{ url_for('login') }}">I already have one</a>
+          </div>
+        </div>
+
+        <div class="landing-split-media landing-shot">
+          <div class="browser-frame">
+            <div class="browser-bar"><span></span><span></span><span></span></div>
+            <img src="{{ url_for('static', filename='branding/screenshots/register.png') }}"
+              alt="Create a Makrotik Share account" loading="lazy" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section landing-wrap" id="how">
+      <div class="landing-section-head">
+        <div class="section-label">How it works</div>
+        <h2 class="landing-section-title">Three steps. No sign-up.</h2>
+      </div>
+
+      <div class="landing-features">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 5v7M7 8l3-3 3 3" />
+              <rect x="3.5" y="3.5" width="13" height="13" rx="3" />
+            </svg>
+          </div>
+          <div class="feature-title">1. Pick a file</div>
+          <p class="feature-body">Drag a file in or browse your device. Nothing leaves until you press upload.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3.5" y="4.5" width="13" height="12" rx="2" />
+              <path d="M3.5 8h13M7 3v3M13 3v3" />
+            </svg>
+          </div>
+          <div class="feature-title">2. Set an expiry</div>
+          <p class="feature-body">Pick how long the link stays alive — from an hour up to never. Expired files clean themselves up.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 12a3.5 3.5 0 0 0 5 0l2.5-2.5a3.5 3.5 0 1 0-5-5L9 6" />
+              <path d="M12 8a3.5 3.5 0 0 0-5 0L4.5 10.5a3.5 3.5 0 1 0 5 5L11 14" />
+            </svg>
+          </div>
+          <div class="feature-title">3. Share the link</div>
+          <p class="feature-body">Send the private link to anyone. They download it — no account needed on their side either.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section landing-wrap">
+      <div class="landing-cta">
+        <h2 class="landing-cta-title">Ready when you are.</h2>
+        <p class="landing-cta-sub">No sign-up. No credit card. Just a file and a link.</p>
+        <div class="landing-cta-actions">
+          <a class="btn btn-primary btn-lg" href="{{ url_for('dashboard') }}">Start uploading</a>
+          {% if not current_user %}
+            <a class="btn btn-secondary btn-lg" href="{{ url_for('register') }}">Create a free account</a>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  {% include 'partials/_site_footer.html' %}
+</body>
+</html>

@@ -1,0 +1,101 @@
+{% extends "legal_base.html" %}
+
+{% block title %}Privacy &amp; Cookie Policy — Makrotik Share{% endblock %}
+{% block head_meta %}
+  <meta name="description"
+    content="How Makrotik Share handles personal data and cookies, under the GDPR and Bulgarian data protection law." />
+{% endblock %}
+{% block doc_section %}Policies{% endblock %}
+{% block doc_title %}Privacy &amp; Cookie Policy{% endblock %}
+
+{% block content %}
+<p class="legal-lead">
+  This policy explains what personal data {{ site_name }} collects, why we collect it,
+  how long we keep it, and the choices you have. It covers the GDPR
+  (Regulation (EU) 2016/679) and the Bulgarian <em>Law on Personal Data Protection</em>
+  (Закон за защита на личните данни).
+</p>
+
+<h2>1. Who is responsible</h2>
+<p>
+  {{ site_name }} ("we", "us") is the <strong>data controller</strong> for the personal
+  data described here. We operate from Bulgaria. For any privacy question or request,
+  contact us at <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.
+</p>
+
+<h2>2. What we collect</h2>
+<ul>
+  <li><strong>Files you upload.</strong> The file content and its name and size, stored so
+    it can be downloaded through its private link.</li>
+  <li><strong>Transfer metadata.</strong> A random link token, upload time, chosen expiry,
+    a download counter, and an anonymous capability key used so you can delete a file
+    without an account.</li>
+  <li><strong>Account data (optional).</strong> If you register, a username, an email
+    address, and a securely hashed password. We never store your password in plain text.</li>
+  <li><strong>Technical data.</strong> Basic server/connection data needed to deliver the
+    pages and protect the service, plus a session cookie (see section 6).</li>
+</ul>
+<p>We do <strong>not</strong> sell personal data, and we do not build advertising profiles.</p>
+
+<h2>3. Why we use it and our legal basis</h2>
+<ul>
+  <li><strong>To provide the service</strong> — storing, delivering and expiring
+    transfers. Legal basis: performance of a contract (Art. 6(1)(b) GDPR).</li>
+  <li><strong>To keep accounts working</strong> — authentication and your dashboard.
+    Legal basis: performance of a contract (Art. 6(1)(b)).</li>
+  <li><strong>To keep the service safe and available</strong> — abuse prevention and
+    security. Legal basis: our legitimate interests (Art. 6(1)(f)).</li>
+  <li><strong>To comply with the law</strong> — e.g. responding to a lawful request.
+    Legal basis: legal obligation (Art. 6(1)(c)).</li>
+</ul>
+
+<h2>4. How long we keep it</h2>
+<ul>
+  <li><strong>Files</strong> are deleted automatically when the transfer expires, or
+    sooner if you delete them. "Never" links stay until you remove them.</li>
+  <li><strong>Anonymous transfer records</strong> are removed together with their file.</li>
+  <li><strong>Account data</strong> is kept while your account is active. Ask us to delete
+    your account and we will remove the associated personal data, subject to any legal
+    retention duties.</li>
+</ul>
+
+<h2>5. Who we share it with</h2>
+<p>
+  We do not share your files with third parties. We use a limited number of
+  infrastructure providers (hosting, storage) strictly to run the service; they process
+  data on our instructions. Where a provider is outside the EEA, transfers are protected
+  by appropriate safeguards under Chapter V GDPR.
+</p>
+
+<h2 id="cookies">6. Cookies and similar technologies</h2>
+<p>
+  We keep cookies to a minimum and use no advertising or third-party tracking cookies.
+</p>
+<ul>
+  <li><strong>Session cookie</strong> — needed for security (a CSRF token) and, if you
+    sign in, to keep you signed in. It is strictly necessary, so it does not require
+    consent.</li>
+  <li><strong>Preference storage</strong> — small local values (for example, remembering a
+    chosen expiry) that never leave your browser.</li>
+</ul>
+<p>
+  Under the Bulgarian <em>Law on Electronic Communications</em> and the ePrivacy
+  Directive (2002/58/EC), strictly necessary cookies may be set without consent. Because
+  we set no other cookies, no consent banner is required. Should that change, we will ask
+  first.
+</p>
+
+<h2>7. Your rights</h2>
+<p>
+  Under the GDPR you can access, correct, delete, restrict, or object to processing of
+  your personal data, and request data portability. See our
+  <a href="{{ url_for('gdpr') }}">GDPR page</a> for how to exercise these rights and how
+  to complain to the Bulgarian supervisory authority.
+</p>
+
+<h2>8. Changes</h2>
+<p>
+  We may update this policy from time to time. The "last updated" date at the top always
+  reflects the current version.
+</p>
+{% endblock %}

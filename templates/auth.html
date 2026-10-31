@@ -1,0 +1,69 @@
+{% extends "auth_base.html" %}
+{% block title %}{{ "Sign in" if mode == 'login' else "Create account" }} — Makrotik Share{% endblock %}
+
+{% block content %}
+<div class="auth-card card">
+  <header class="auth-head">
+    <p class="page-eyebrow">Optional account</p>
+    <h1 class="auth-title">{{ "Welcome back" if mode == 'login' else "Join Makrotik" }}</h1>
+    <p class="auth-sub">
+      Accounts are optional. Uploading and downloading never requires one —
+      signing in just unlocks your personal dashboard.
+    </p>
+  </header>
+
+  <nav class="auth-tabs" role="tablist">
+    <a href="{{ url_for('login') }}" role="tab"
+       class="auth-tab {% if mode != 'register' %}is-active{% endif %}">Sign in</a>
+    <a href="{{ url_for('register') }}" role="tab"
+       class="auth-tab {% if mode == 'register' %}is-active{% endif %}">Create account</a>
+  </nav>
+
+  {% if mode == 'register' %}
+  <div class="auth-panel" role="tabpanel">
+    <form method="post" class="auth-form" action="{{ url_for('register') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <label class="field">
+        <span class="field-label">Username</span>
+        <input class="input" type="text" name="username" autocomplete="username"
+               value="{{ request.form.get('username', '') }}"
+               placeholder="yourhandle" required minlength="3" maxlength="32" />
+      </label>
+      <label class="field">
+        <span class="field-label">Email</span>
+        <input class="input" type="email" name="email" autocomplete="email"
+               value="{{ request.form.get('email', '') }}"
+               placeholder="you@domain.com" required />
+      </label>
+      <label class="field">
+        <span class="field-label">Password</span>
+        <input class="input" type="password" name="password" autocomplete="new-password"
+               placeholder="at least 6 characters" required minlength="6" />
+      </label>
+      <button type="submit" class="btn btn-primary btn-lg auth-submit">Create free account</button>
+    </form>
+  </div>
+  {% else %}
+  <div class="auth-panel" role="tabpanel">
+    <form method="post" class="auth-form" action="{{ url_for('login') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <label class="field">
+        <span class="field-label">Username or email</span>
+        <input class="input" type="text" name="username" autocomplete="username"
+               placeholder="yourhandle or you@domain.com" required />
+      </label>
+      <label class="field">
+        <span class="field-label">Password</span>
+        <input class="input" type="password" name="password" autocomplete="current-password"
+               required minlength="6" />
+      </label>
+      <button type="submit" class="btn btn-primary btn-lg auth-submit">Sign in</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <p class="auth-note">
+    You can always keep sharing anonymously — no account is ever forced on you.
+  </p>
+</div>
+{% endblock %}

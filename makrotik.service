@@ -1,0 +1,15 @@
+[Unit]
+Description=Makrotik Share
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/makrotik
+EnvironmentFile=/opt/makrotik/.env
+ExecStart=/opt/makrotik/venv/bin/gunicorn -w 1 -b ${MAKROTIK_HOST}:${MAKROTIK_PORT} wsgi:app
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,157 @@
+{% extends "admin/base.html" %}
+{% block title %}Audit log — Makrotik Admin{% endblock %}
+{% block topbar %}Audit log{% endblock %}
+
+{% block content %}
+<header class="hero hero-compact admin-hero">
+  <p class="page-eyebrow">Control room / history</p>
+  <h1 class="page-title">Append-only.<br /><strong>Tamper-evident.</strong></h1>
+  <p class="page-sub">
+    Every meaningful action is chained with SHA-256. Audit rows are never
+    edited or deleted by the application; legacy rows from before the chain
+    existed are reported separately.
+  </p>
+</header>
+
+<section class="section">
+  <div class="admin-two-col">
+    <div class="admin-col">
+      <div class="section-label">Chain verification</div>
+      <div class="card admin-panel">
+        {% if verification %}
+        <div class="admin-panel-head">
+          <div>
+            <div class="admin-kicker">Last verification</div>
+            <div class="admin-engine-title">
+              <span class="admin-engine-dot {{ 'is-pg' if verification.ok else 'is-sqlite' }}"></span>
+              {{ 'Chain intact' if verification.ok else 'Chain broken' }}
+            </div>
+          </div>
+          <span class="admin-status-pill {{ 'is-ok' if verification.ok else 'is-down' }}">
+            {{ 'Verified' if verification.ok else 'Attention' }}
+          </span>
+        </div>
+        <dl class="admin-kv">
+          <div><dt>Checked</dt><dd>{{ verification.checked }} hashed entries</dd></div>
+          <div><dt>Legacy rows</dt><dd>{{ verification.legacy }} unhashed</dd></div>
+          <div><dt>Checked at</dt><dd>{{ verification.checked_at.replace('T', ' ') }} UTC</dd></div>
+          <div><dt>Head</dt><dd class="admin-mono admin-truncate">{{ verification.head }}</dd></div>
+        </dl>
+        {% if verification.broken %}
+        <div class="admin-inline-error">
+          Entry #{{ verification.broken[0].id }}: {{ verification.broken[0].reason }}.
+        </div>
+        {% endif %}
+        {% else %}
+        <p class="admin-muted">
+          Run a verification to walk the hash chain from its genesis entry to
+          the current head. Legacy rows are counted, not treated as tampering.
+        </p>
+        {% endif %}
+        <form method="post" action="{{ url_for('admin_audit_verify') }}" class="admin-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+          <button class="btn btn-primary" type="submit">Verify audit chain</button>
+        </form>
+      </div>
+    </div>
+    <div class="admin-col">
+      <div class="section-label">Export</div>
+      <div class="card admin-panel">
+        <p class="admin-muted">
+          Export the current filtered view as machine-readable JSON or CSV.
+          Exports are limited to 10,000 rows and are themselves audited by the
+          request that generates them.
+        </p>
+        <div class="btn-row admin-muted-top">
+          <a class="btn btn-secondary"
+             href="{{ url_for('admin_audit_export', format='json', q=filters.get('q', ''), actor=filters.get('actor', ''), action=filters.get('action', ''), severity=filters.get('severity', ''), category=filters.get('category', ''), token=filters.get('token', ''), start=filters.get('start', ''), end=filters.get('end', '')) }}">Export JSON</a>
+          <a class="btn btn-ghost"
+             href="{{ url_for('admin_audit_export', format='csv', q=filters.get('q', ''), actor=filters.get('actor', ''), action=filters.get('action', ''), severity=filters.get('severity', ''), category=filters.get('category', ''), token=filters.get('token', ''), start=filters.get('start', ''), end=filters.get('end', '')) }}">Export CSV</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-label">Filter history</div>
+  <form class="card admin-panel admin-filter-form" method="get" action="{{ url_for('admin_audit_page') }}">
+    <label class="field">
+      <span class="field-label">Search</span>
+      <input class="input" type="search" name="q" value="{{ filters.get('q', '') }}" placeholder="detail, actor, action, token" />
+    </label>
+    <label class="field">
+      <span class="field-label">Actor</span>
+      <input class="input" type="text" name="actor" value="{{ filters.get('actor', '') }}" placeholder="admin:…" />
+    </label>
+    <label class="field">
+      <span class="field-label">Action</span>
+      <input class="input" type="text" name="action" value="{{ filters.get('action', '') }}" placeholder="upload" />
+    </label>
+    <label class="field">
+      <span class="field-label">Severity</span>
+      <select class="input" name="severity">
+        <option value="">Any</option>
+        {% for value in severities %}
+        <option value="{{ value }}" {% if filters.get('severity') == value %}selected{% endif %}>{{ value }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field">
+      <span class="field-label">Category</span>
+      <select class="input" name="category">
+        <option value="">Any</option>
+        {% for value in categories %}
+        <option value="{{ value }}" {% if filters.get('category') == value %}selected{% endif %}>{{ value }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field">
+      <span class="field-label">Token</span>
+      <input class="input" type="text" name="token" value="{{ filters.get('token', '') }}" placeholder="file token" />
+    </label>
+    <label class="field">
+      <span class="field-label">From (UTC)</span>
+      <input class="input" type="text" name="start" value="{{ filters.get('start', '') }}" placeholder="2026-10-01" />
+    </label>
+    <label class="field">
+      <span class="field-label">To (UTC)</span>
+      <input class="input" type="text" name="end" value="{{ filters.get('end', '') }}" placeholder="2026-10-31" />
+    </label>
+    <div class="field admin-filter-actions">
+      <button class="btn btn-primary" type="submit">Apply filters</button>
+      <a class="btn btn-ghost" href="{{ url_for('admin_audit_page') }}">Reset</a>
+    </div>
+  </form>
+</section>
+
+<section class="section">
+  <div class="card admin-table-card">
+    {% if events %}
+    <div class="admin-table admin-audit-table admin-audit-full admin-audit-rich">
+      <div class="admin-tr admin-th">
+        <span>When (UTC)</span><span>Severity</span><span>Category</span><span>Actor</span><span>Action</span><span>Token</span><span>Detail</span><span>Hash</span>
+      </div>
+      {% for e in events %}
+      <div class="admin-tr">
+        <span class="admin-mono">{{ e['created_at'].replace('T', ' ') }}</span>
+        <span><span class="admin-severity is-{{ e['severity'] or 'info' }}">{{ e['severity'] or 'info' }}</span></span>
+        <span><span class="admin-action-badge">{{ e['category'] or 'system' }}</span></span>
+        <span>{{ e['actor'] }}</span>
+        <span><span class="admin-action-badge">{{ e['action'] }}</span></span>
+        <span class="admin-mono admin-token">{{ e['token'] or '—' }}</span>
+        <span class="admin-truncate" title="{{ e['detail'] }}">{{ e['detail'] }}</span>
+        <span class="admin-mono admin-token admin-truncate" title="{{ e['entry_hash'] or 'legacy' }}">{{ (e['entry_hash'] or 'legacy')[:12] }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="admin-table-note">Showing up to 500 matching events, newest first.</p>
+    {% else %}
+    <div class="empty">
+      <div class="empty-title">No audit events match</div>
+      <p class="empty-sub">Adjust the filters or clear them to see the full trail.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

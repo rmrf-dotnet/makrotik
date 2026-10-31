@@ -1,0 +1,90 @@
+{% extends "legal_base.html" %}
+
+{% block title %}GDPR &amp; your rights (Bulgaria) — Makrotik Share{% endblock %}
+{% block head_meta %}
+  <meta name="description"
+    content="Your data protection rights under the GDPR in Bulgaria, and how to use them with Makrotik Share and the Bulgarian CPDP." />
+{% endblock %}
+{% block doc_section %}Data protection{% endblock %}
+{% block doc_title %}GDPR &amp; your rights in Bulgaria{% endblock %}
+
+{% block content %}
+<p class="legal-lead">
+  {{ site_name }} operates from Bulgaria, so your personal data is protected by the EU
+  General Data Protection Regulation (GDPR, Regulation (EU) 2016/679) together with
+  Bulgaria's <em>Law on Personal Data Protection</em> (Закон за защита на личните данни,
+  ЗЗЛД). This page summarises your rights and how to use them.
+</p>
+
+<h2>Who supervises us</h2>
+<p>
+  In Bulgaria, the GDPR is enforced by the independent
+  <strong>Commission for Personal Data Protection</strong>
+  (Комисия за защита на личните данни — CPDP). You can contact the CPDP directly at any
+  time:
+</p>
+<ul>
+  <li><strong>Address:</strong> 2 Prof. Tsvetan Lazarov Blvd., 1592 Sofia, Bulgaria</li>
+  <li><strong>Phone:</strong> +359 2 915 35 18 &middot; <strong>Fax:</strong> +359 2 915 35 25</li>
+  <li><strong>Email:</strong> <a href="mailto:kzld@cpdp.bg">kzld@cpdp.bg</a></li>
+  <li><strong>Website:</strong>
+    <a href="https://www.cpdp.bg/en/" target="_blank" rel="noopener noreferrer">www.cpdp.bg</a></li>
+</ul>
+
+<h2>Your rights under the GDPR</h2>
+<ul>
+  <li><strong>Access (Art. 15).</strong> Ask whether we process your data and get a copy.</li>
+  <li><strong>Rectification (Art. 16).</strong> Have inaccurate data corrected.</li>
+  <li><strong>Erasure (Art. 17).</strong> Ask us to delete your data ("right to be
+    forgotten") — for example, deleting a transfer or your account.</li>
+  <li><strong>Restriction (Art. 18).</strong> Ask us to limit how we use your data.</li>
+  <li><strong>Portability (Art. 20).</strong> Receive the data you gave us in a portable
+    format.</li>
+  <li><strong>Object (Art. 21).</strong> Object to processing based on our legitimate
+    interests.</li>
+  <li><strong>Withdraw consent (Art. 7).</strong> Where processing relies on consent, you
+    can withdraw it at any time.</li>
+  <li><strong>Not be profiled (Art. 22).</strong> We do not make automated decisions that
+    significantly affect you.</li>
+</ul>
+
+<h2>How to exercise your rights</h2>
+<p>
+  Email <a href="mailto:{{ contact_email }}">{{ contact_email }}</a> with what you would
+  like to do. We will respond within one month (extendable by two months for complex
+  requests), and exercising your rights is free. We may need to verify your identity —
+  especially for anonymous transfers, where the private link token is the only thing that
+  ties a file to you.
+</p>
+
+<h2>What we process and why</h2>
+<p>
+  We keep processing to a minimum. In short: files and their metadata to run the service
+  (contract), optional account details to provide your dashboard (contract), and basic
+  security/technical data to protect the service (legitimate interests). We do not sell
+  data or run advertising profiles. Full detail is in our
+  <a href="{{ url_for('privacy') }}">Privacy &amp; Cookie Policy</a>.
+</p>
+
+<h2>International transfers</h2>
+<p>
+  We aim to keep data within the EEA. If a service provider processes data outside the
+  EEA, we rely on appropriate safeguards under Chapter V of the GDPR (such as the European
+  Commission's Standard Contractual Clauses).
+</p>
+
+<h2>Children</h2>
+<p>
+  Under Bulgarian law the age at which a child can consent to information-society services
+  is <strong>14</strong>. We do not knowingly allow children under 14 to create an account
+  or share personal data.
+</p>
+
+<h2>How to complain</h2>
+<p>
+  If you believe we have handled your data unlawfully, please contact us first at
+  <a href="mailto:{{ contact_email }}">{{ contact_email }}</a> so we can put it right. You
+  also have the right to lodge a complaint with the CPDP (details above) or with the
+  supervisory authority in your country of residence.
+</p>
+{% endblock %}

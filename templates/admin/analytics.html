@@ -1,0 +1,133 @@
+{% extends "admin/base.html" %}
+{% block title %}Traffic — Makrotik Admin{% endblock %}
+{% block topbar %}Traffic analytics{% endblock %}
+
+{% block content %}
+<header class="hero hero-compact admin-hero">
+  <p class="page-eyebrow">Control room / transfer intelligence</p>
+  <h1 class="page-title">See the flow.<br /><strong>Not just the totals.</strong></h1>
+  <p class="page-sub">
+    Upload and download bytes are recorded per event, then bucketed in Python
+    so the same analytics work on SQLite and PostgreSQL. Historical downloads
+    from before this table existed are counted separately below.
+  </p>
+</header>
+
+<section class="section">
+  <div class="admin-toolbar">
+    <div class="admin-filter-tabs">
+      {% for value, label in [(7, '7 days'), (30, '30 days'), (90, '90 days'), (365, '1 year')] %}
+      <a class="admin-filter {% if days == value %}is-active{% endif %}"
+         href="{{ url_for('admin_analytics_page', days=value) }}">{{ label }}</a>
+      {% endfor %}
+    </div>
+    <div class="admin-kicker">{{ traffic.from.replace('T', ' ') }} → {{ traffic.to.replace('T', ' ') }} UTC</div>
+  </div>
+
+  <div class="grid-4">
+    <div class="card stat-card admin-stat">
+      <div class="card-eyebrow">Total transferred</div>
+      <div class="stat-num">{{ traffic.total_human }}</div>
+      <div class="stat-sub">{{ traffic.events }} recorded events</div>
+    </div>
+    <div class="card stat-card admin-stat">
+      <div class="card-eyebrow">Uploaded</div>
+      <div class="stat-num">{{ traffic.upload_human }}</div>
+      <div class="stat-sub">{{ traffic.uploads }} uploads</div>
+    </div>
+    <div class="card stat-card admin-stat">
+      <div class="card-eyebrow">Downloaded</div>
+      <div class="stat-num">{{ traffic.download_human }}</div>
+      <div class="stat-sub">{{ traffic.downloads }} downloads</div>
+    </div>
+    <div class="card stat-card admin-stat">
+      <div class="card-eyebrow">Lifetime downloads</div>
+      <div class="stat-num">{{ lifetime.n }}</div>
+      <div class="stat-sub">across {{ lifetime.files }} file records</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-label">Daily volume</div>
+  <div class="card admin-panel">
+    <div class="trend-chart trend-chart-tall" aria-label="Daily transfer volume">
+      {% for bucket in traffic.buckets %}
+      <div class="trend-bar-wrap" title="{{ bucket.date }} — up {{ bucket.upload_human }}, down {{ bucket.download_human }}">
+        <div class="trend-bar" style="height: {{ 3 + bucket.percent * 0.97 }}%"></div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="trend-axis">
+      <span>{{ traffic.buckets[0].date if traffic.buckets else '' }}</span>
+      <span>today</span>
+    </div>
+  </div>
+</section>
+
+<section class="section admin-two-col">
+  <div class="admin-col">
+    <div class="section-label">Top files by bytes</div>
+    <div class="card admin-panel">
+      {% if traffic.top_files %}
+      <ul class="admin-list">
+        {% for item in traffic.top_files %}
+        <li>
+          <div>
+            <div class="admin-list-title">{{ item.name }}</div>
+            <div class="admin-list-sub admin-mono">{{ item.token }}</div>
+          </div>
+          <div class="admin-backup-meta">
+            <span class="admin-list-meta">{{ item.events }} events</span>
+            <strong class="admin-list-meta">{{ item.bytes_human }}</strong>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="admin-muted">No transfer events in this period.</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="admin-col">
+    <div class="section-label">Top actors by bytes</div>
+    <div class="card admin-panel">
+      {% if traffic.top_actors %}
+      <ul class="admin-list">
+        {% for item in traffic.top_actors %}
+        <li>
+          <div class="admin-list-title">{{ item.actor }}</div>
+          <strong class="admin-list-meta">{{ item.bytes_human }}</strong>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="admin-muted">No actors recorded in this period.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-label">Daily detail</div>
+  <div class="card admin-table-card">
+    <div class="admin-table admin-analytics-table">
+      <div class="admin-tr admin-th">
+        <span>Date</span><span>Uploads</span><span>Downloads</span><span>Events</span><span>Total</span><span>Share of peak</span>
+      </div>
+      {% for bucket in traffic.buckets | reverse %}
+      <div class="admin-tr">
+        <span class="admin-mono">{{ bucket.date }}</span>
+        <span class="admin-mono">{{ bucket.upload_human }}</span>
+        <span class="admin-mono">{{ bucket.download_human }}</span>
+        <span>{{ bucket.events }}</span>
+        <span class="admin-mono">{{ bucket.total_human }}</span>
+        <span>
+          <span class="admin-mini-meter"><span style="width: {{ bucket.percent }}%"></span></span>
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

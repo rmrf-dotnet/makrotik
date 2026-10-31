@@ -1,0 +1,350 @@
+{% extends "admin/base.html" %}
+{% block title %}Overview — Makrotik Admin{% endblock %}
+{% block topbar %}Control room{% endblock %}
+
+{% block content %}
+<header class="hero hero-compact admin-hero">
+  <p class="page-eyebrow">Control room / durable database</p>
+  <h1 class="page-title">Everything registered.<br /><strong>Nothing lost.</strong></h1>
+  <p class="page-sub">
+    The database is append-only by default: files are archived instead of
+    destroyed, every action is audited, and only an explicit purge removes a
+    record. Backups and integrity scans keep the whole system verifiable.
+  </p>
+</header>
+
+{% if warnings %}
+<div class="admin-warnings">
+  {% for w in warnings %}
+  <div class="admin-warning">
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7.5 2L14 13H1L7.5 2z" /><path d="M7.5 6v3M7.5 11v.5" />
+    </svg>
+    <span>{{ w }}</span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<section class="section stats-section">
+  <div class="section-label">Live numbers</div>
+  <div class="grid-4">
+    <div class="card stat-card admin-stat">
+      <div class="card-eyebrow">Active files</div>
+      <div class="stat-num">{{ storage['files_count'] }}</div>
+      <div class="stat-sub">{{ storage['files_human'] }} served now</div>
+    </div>
+    <div class="card stat-card admin-stat">
+      <div class="card-eyebrow">Archived</div>
+      <div class="stat-num">{{ storage['archived_count'] }}</div>
+      <div class="stat-sub">{{ storage['archived_human'] }} recoverable</div>
+    </div>
+    <div class="card stat-card admin-stat">
+      <div class="card-eyebrow">Total records</div>
+      <div class="stat-num">{{ storage['total_records'] }}</div>
+      <div class="stat-sub">never silently removed</div>
+    </div>
+    <div class="card stat-card admin-stat">
+      <div class="card-eyebrow">Downloads</div>
+      <div class="stat-num">{{ downloads }}</div>
+      <div class="stat-sub">lifetime, all records</div>
+    </div>
+  </div>
+  <div class="grid-4 admin-grid-gap">
+    <div class="card stat-card admin-stat">
+      <div class="card-eyebrow">Accounts</div>
+      <div class="stat-num">{{ users }}</div>
+      <div class="stat-sub">registered users</div>
+    </div>
+    <div class="card stat-card admin-stat">
+      <div class="card-eyebrow">Audit events</div>
+      <div class="stat-num">{{ events }}</div>
+      <div class="stat-sub">append-only history</div>
+    </div>
+    <div class="card stat-card admin-stat">
+      <div class="card-eyebrow">Database size</div>
+      <div class="stat-num">{{ info['size_human'] }}</div>
+      <div class="stat-sub">{{ info['engine'] }}</div>
+    </div>
+    <div class="card stat-card admin-stat">
+      <div class="card-eyebrow">Disk free</div>
+      <div class="stat-num">{{ storage['disk_free_human'] }}</div>
+      <div class="stat-sub">of {{ storage['disk_total_human'] }}</div>
+    </div>
+  </div>
+</section>
+
+<section class="section admin-two-col">
+  <div class="admin-col">
+    <div class="section-label">Database health</div>
+    <div class="card admin-panel">
+      <div class="admin-panel-head">
+        <div>
+          <div class="admin-kicker">Connected engine</div>
+          <div class="admin-engine-title">
+            <span class="admin-engine-dot {% if info['engine'] == 'postgres' %}is-pg{% else %}is-sqlite{% endif %}"></span>
+            {{ 'PostgreSQL' if info['engine'] == 'postgres' else 'SQLite fallback' }}
+          </div>
+        </div>
+        <span class="admin-status-pill {{ 'is-ok' if info['ok'] else 'is-down' }}">
+          {{ 'Healthy' if info['ok'] else 'Unreachable' }}
+        </span>
+      </div>
+
+      {% if info['error'] %}
+      <div class="admin-inline-error">{{ info['error'] }}</div>
+      {% endif %}
+
+      <dl class="admin-kv">
+        <div><dt>Version</dt><dd>{{ info['version'] or '—' }}</dd></div>
+        <div><dt>Uptime</dt><dd>{{ info['uptime_human'] }}</dd></div>
+        <div><dt>Connections</dt><dd>{{ info['connections'] }}</dd></div>
+        <div><dt>Schema</dt><dd>v{{ info['schema_version'] or '—' }}</dd></div>
+        <div><dt>Endpoint</dt><dd class="admin-mono">{{ info['url'] }}</dd></div>
+      </dl>
+
+      {% if info['settings'] %}
+      <div class="admin-kicker admin-kicker-spaced">Durability settings</div>
+      <div class="admin-chips">
+        {% for key, value in info['settings'].items() %}
+        <span class="admin-chip {% if value|lower in ['off', '0', 'minimal'] %}is-bad{% endif %}">
+          <span>{{ key }}</span><strong>{{ value }}</strong>
+        </span>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="section-label admin-label-spaced">Storage</div>
+    <div class="card storage-card admin-panel">
+      <div class="meter-header">
+        <div>
+          <div class="meter-used">{{ storage['disk_used_human'] }}
+            <span class="meter-used-of">/ {{ storage['disk_total_human'] }}</span>
+          </div>
+          <div class="meter-sub">
+            {{ storage['files_count'] }} active &middot; {{ storage['archived_count'] }} archived
+            &middot; {{ storage['total_records'] }} records in the database
+          </div>
+        </div>
+        <div class="meter-pct meter-pct-{{ meter['level'] }}">{{ meter['percent'] }}%</div>
+      </div>
+      <div class="meter meter-{{ meter['level'] }}">
+        <div class="meter-fill" style="width: {{ meter['percent'] }}%"></div>
+      </div>
+      <div class="meter-legend">
+        <span>{{ storage['disk_free_human'] }} free</span>
+        <span>{{ storage['disk_total_human'] }} volume capacity</span>
+      </div>
+      <div class="admin-divider"></div>
+      <div class="admin-kicker">Storage breakdown</div>
+      <div class="storage-breakdown">
+        {% for segment in breakdown.segments %}
+        <div class="storage-segment">
+          <div class="storage-segment-head">
+            <span>{{ segment.label }}</span>
+            <strong>{{ segment.human }}</strong>
+          </div>
+          <div class="storage-track">
+            <span class="storage-fill {{ segment.class }}" style="width: {{ segment.percent }}%"></span>
+          </div>
+          <span class="storage-percent">{{ segment.percent }}%</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-col">
+    <div class="section-label">Operations</div>
+    <div class="card admin-panel">
+      <div class="admin-kicker">Run now</div>
+      <div class="admin-action-list">
+        <form method="post" action="{{ url_for('admin_integrity') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+          <button class="btn btn-secondary admin-action" type="submit">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2.5 7.5l3 3 6-6.5" />
+            </svg>
+            Verify integrity
+          </button>
+        </form>
+        <form method="post" action="{{ url_for('admin_create_backup') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+          <button class="btn btn-secondary admin-action" type="submit">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7.5 2v8M4.5 7.5l3 3 3-3M2.5 12.5h10" />
+            </svg>
+            Create database backup
+          </button>
+        </form>
+        <form method="post" action="{{ url_for('admin_maintenance') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+          <button class="btn btn-ghost admin-action" type="submit">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 7.5a5.5 5.5 0 0 1 9.4-3.9M13 7.5A5.5 5.5 0 0 1 3.6 11.4" />
+              <path d="M11.5 1.5v3h-3M3.5 13.5v-3h3" />
+            </svg>
+            Vacuum &amp; analyze
+          </button>
+        </form>
+      </div>
+
+      <div class="admin-divider"></div>
+      <div class="admin-kicker">Last integrity scan</div>
+      {% if scan %}
+      <div class="admin-scan {{ 'is-ok' if scan['ok'] else 'is-bad' }}">
+        <div class="admin-scan-head">
+          <strong>{{ 'Clean' if scan['ok'] else 'Issues found' }}</strong>
+          <span>{{ scan['scanned_at'].replace('T', ' ') }} UTC</span>
+        </div>
+        <div class="admin-scan-grid">
+          <span>{{ scan['records'] }} records</span>
+          <span>{{ scan['missing'] | length }} missing</span>
+          <span>{{ scan['orphans'] | length }} orphans</span>
+          <span>{{ scan['checksum_mismatch'] | length }} checksum errors</span>
+        </div>
+      </div>
+      {% else %}
+      <p class="admin-muted">No scan has run yet. Verify integrity to compare every database row with the bytes on disk.</p>
+      {% endif %}
+    </div>
+
+    <div class="section-label admin-label-spaced">Latest backups</div>
+    <div class="card admin-panel">
+      {% if backups %}
+      <ul class="admin-list">
+        {% for b in backups %}
+        <li>
+          <div>
+            <a class="admin-list-title" href="{{ url_for('admin_download_backup', name=b['name']) }}">{{ b['name'] }}</a>
+            <div class="admin-list-sub">{{ b['kind'] }} &middot; {{ b['size_human'] }}</div>
+          </div>
+          <span class="admin-list-meta">{{ b['created_at'] }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      <a class="btn btn-ghost btn-sm admin-full-btn" href="{{ url_for('admin_backups_page') }}">All backups</a>
+      {% else %}
+      <p class="admin-muted">No backups yet. Create one before making any changes.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-label">Transfer activity / last 14 days</div>
+  <div class="card admin-panel">
+    <div class="admin-panel-head">
+      <div>
+        <div class="admin-kicker">Recorded transfer bytes</div>
+        <div class="admin-engine-title">{{ traffic.total_human }}</div>
+      </div>
+      <span class="admin-status-pill is-ok">{{ traffic.events }} events</span>
+    </div>
+    <div class="admin-traffic-summary">
+      <span><strong>{{ traffic.upload_human }}</strong> uploaded</span>
+      <span><strong>{{ traffic.download_human }}</strong> downloaded</span>
+      <a href="{{ url_for('admin_analytics_page') }}">Open traffic analytics &rarr;</a>
+    </div>
+    <div class="trend-chart" aria-label="Daily transfer volume">
+      {% for bucket in traffic.buckets %}
+      <div class="trend-bar-wrap" title="{{ bucket.date }}: {{ bucket.total_human }}">
+        <div class="trend-bar" style="height: {{ 4 + bucket.percent * 0.96 }}%"></div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="trend-axis"><span>{{ traffic.buckets[0].date if traffic.buckets else '' }}</span><span>today</span></div>
+  </div>
+</section>
+
+<section class="section admin-two-col">
+  <div class="admin-col">
+    <div class="section-label">Host health</div>
+    <div class="card admin-panel">
+      <dl class="admin-kv">
+        <div><dt>Host</dt><dd>{{ host.hostname }}</dd></div>
+        <div><dt>Platform</dt><dd>{{ host.platform }}</dd></div>
+        <div><dt>CPU cores</dt><dd>{{ host.cpu_count }}</dd></div>
+        <div><dt>Load</dt><dd>{{ host.load | join(' / ') if host.load else '—' }}</dd></div>
+        <div><dt>Memory</dt><dd>{{ host.memory.percent if host.memory else '—' }}{% if host.memory %}% used{% endif %}</dd></div>
+        <div><dt>Process RSS</dt><dd>{{ host.process.rss_human }}</dd></div>
+      </dl>
+      <a class="btn btn-ghost btn-sm admin-full-btn" href="{{ url_for('admin_infrastructure_page') }}">Open infrastructure</a>
+    </div>
+  </div>
+  <div class="admin-col">
+    <div class="section-label">Security posture</div>
+    <div class="card admin-panel">
+      <dl class="admin-kv">
+        <div><dt>Role</dt><dd>{{ admin_role_label }}</dd></div>
+        <div><dt>2FA</dt><dd>{{ 'Enabled' if admin_account and admin_account.totp_enabled else 'Not enabled' }}</dd></div>
+        <div><dt>Audit chain</dt><dd>{{ 'Verified clean' if audit_verification and audit_verification.ok else 'Not verified yet' }}</dd></div>
+        <div><dt>Session</dt><dd>Expires {{ admin_account.expires_at.replace('T', ' ') if admin_account else '—' }}</dd></div>
+      </dl>
+      <div class="btn-row admin-muted-top">
+        <a class="btn btn-secondary btn-sm" href="{{ url_for('admin_security_page') }}">Security &amp; 2FA</a>
+        {% if admin_can('manage_sessions') %}<a class="btn btn-ghost btn-sm" href="{{ url_for('admin_sessions_page') }}">Sessions</a>{% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-label">Recent audit trail</div>
+  <div class="card admin-table-card">
+    {% if recent %}
+    <div class="admin-table admin-audit-table">
+      <div class="admin-tr admin-th">
+        <span>When</span><span>Actor</span><span>Action</span><span>Detail</span>
+      </div>
+      {% for e in recent %}
+      <div class="admin-tr">
+        <span class="admin-mono">{{ e['created_at'].replace('T', ' ') }}</span>
+        <span>{{ e['actor'] }}</span>
+        <span><span class="admin-action-badge">{{ e['action'] }}</span></span>
+        <span class="admin-truncate">{{ e['detail'] }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <a class="btn btn-ghost btn-sm admin-full-btn" href="{{ url_for('admin_audit_page') }}">Open full audit log</a>
+    {% else %}
+    <p class="admin-muted">No audit events yet.</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-label">Host volumes</div>
+  {% if drives %}
+  <div class="drive-grid">
+    {% for d in drives %}
+    <div class="card drive-card">
+      <div class="drive-head">
+        <div class="drive-name-wrap">
+          <div class="drive-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="12" height="10" rx="2" /><path d="M2 9h12" />
+              <circle cx="11.5" cy="11" r=".75" fill="currentColor" stroke="none" />
+            </svg>
+          </div>
+          <div>
+            <div class="drive-name">{{ d['name'] }}</div>
+            <div class="drive-mount mono">{{ d['mount'] }}</div>
+          </div>
+        </div>
+        <div class="drive-pct {% if d['level'] == 'high' %}meter-pct-high{% elif d['level'] == 'warn' %}meter-pct-warn{% endif %}">{{ d['percent'] }}%</div>
+      </div>
+      <div class="meter meter-{{ d['level'] }}"><div class="meter-fill" style="width: {{ d['percent'] }}%"></div></div>
+      <div class="drive-stats">
+        <span><strong>{{ d['free_human'] }}</strong> free</span>
+        <span>{{ d['used_human'] }} of {{ d['total_human'] }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty card"><div class="empty-title">No volumes detected</div></div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Makrotik Share{% endblock %}</title>
+  <link rel="icon" href="{{ url_for('static', filename='branding/makrotik32x32.ico') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="{{ url_for('index') }}">
+        <img src="{{ url_for('static', filename='branding/makrotik1201x208.png') }}" alt="Makrotik" />
+      </a>
+
+      <nav class="sidebar-nav">
+        <a class="nav-link {% if request.endpoint == 'dashboard' %}is-active{% endif %}"
+           href="{{ url_for('dashboard') }}">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 11V3.5M5 6l3-3 3 3M3 12.5h10" />
+          </svg>
+          New upload
+        </a>
+        <a class="nav-link {% if request.endpoint == 'my_files' %}is-active{% endif %}"
+           href="{{ url_for('my_files') }}">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8.5 2H4a1.5 1.5 0 0 0-1.5 1.5v9A1.5 1.5 0 0 0 4 14h8a1.5 1.5 0 0 0 1.5-1.5V6.5L8.5 2z" />
+            <path d="M8.5 2v4.5H13" />
+          </svg>
+          My files
+        </a>
+      </nav>
+
+      <div class="sidebar-foot">
+        {% if current_user %}
+          <div class="user-card">
+            <div class="avatar">{{ current_user['username'][0] | upper }}</div>
+            <div class="user-meta">
+              <div class="user-name">{{ current_user['username'] }}</div>
+              <div class="user-sub">Signed in</div>
+            </div>
+            <form method="post" action="{{ url_for('logout') }}" class="logout-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+              <button class="btn-icon" type="submit" title="Sign out" aria-label="Sign out">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 2.5H3.5v9H9M6 7h6.5M10.5 4.5L13 7l-2.5 2.5" />
+                </svg>
+              </button>
+            </form>
+          </div>
+        {% else %}
+          <div class="anon-card">
+            <div class="anon-title">Uploading incognito</div>
+            <p class="anon-sub">No account needed to share — create one free to track your transfers.</p>
+            <a class="btn btn-primary btn-sm" href="{{ url_for('login') }}">Sign in</a>
+          </div>
+        {% endif %}
+      </div>
+    </aside>
+
+    <div class="shell-main">
+      <header class="topbar">
+        <div class="topbar-context">
+          {% if request.endpoint == 'my_files' %}
+            <span class="topbar-kicker">Dashboard</span>
+            <span class="topbar-title">My files</span>
+          {% else %}
+            <span class="topbar-kicker">Dashboard</span>
+            <span class="topbar-title">New upload</span>
+          {% endif %}
+        </div>
+        <div class="topbar-actions">
+          {% if not current_user %}
+            <a class="btn btn-ghost btn-sm" href="{{ url_for('login') }}">Sign in</a>
+            <a class="btn btn-primary btn-sm" href="{{ url_for('register') }}">Create account</a>
+          {% endif %}
+        </div>
+      </header>
+
+      <main class="page">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-stack">
+              {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    {% if category == 'error' %}<circle cx="7" cy="7" r="5.5"/><path d="M7 4.5v3M7 10v.5"/>{% else %}<path d="M2.5 7.5l3 3 6-6.5"/>{% endif %}
+                  </svg>
+                  <span>{{ message }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </main>
+
+      <footer class="footer">
+        <div class="footer-brand-block">
+          <span class="footer-brand">{{ site_name }}</span>
+          <span class="footer-meta">Optional accounts &middot; Up to {{ max_upload_human }} per transfer &middot; Auto-expiring links</span>
+        </div>
+        <nav class="footer-links" aria-label="Footer">
+          <a href="{{ url_for('about') }}">About</a>
+          <a href="{{ url_for('status') }}">Status</a>
+          <a href="{{ url_for('privacy') }}">Privacy</a>
+          <a href="{{ url_for('terms') }}">Terms</a>
+          <a href="{{ url_for('gdpr') }}">GDPR</a>
+          <a href="{{ url_for('admin_login') }}">Admin</a>
+          <a href="mailto:{{ contact_email }}">Contact</a>
+        </nav>
+      </footer>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toast-stack"></div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

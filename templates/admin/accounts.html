@@ -1,0 +1,131 @@
+{% extends "admin/base.html" %}
+{% block title %}Admin accounts — Makrotik Admin{% endblock %}
+{% block topbar %}Admin accounts{% endblock %}
+
+{% block content %}
+<header class="hero hero-compact admin-hero">
+  <p class="page-eyebrow">Control room / access control</p>
+  <h1 class="page-title">Least privilege.<br /><strong>Named accounts.</strong></h1>
+  <p class="page-sub">
+    Every admin gets a named account and a role. The environment-managed
+    primary admin is protected; create separate accounts for daily work and
+    keep super admin access for emergencies.
+  </p>
+</header>
+
+<section class="section admin-two-col">
+  <div class="admin-col">
+    <div class="section-label">Create admin</div>
+    <div class="card admin-panel">
+      <form method="post" action="{{ url_for('admin_create_account') }}" class="admin-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label class="field">
+          <span class="field-label">Username</span>
+          <input class="input" type="text" name="username" minlength="3" maxlength="32" required />
+        </label>
+        <label class="field">
+          <span class="field-label">Temporary password (10+ characters)</span>
+          <input class="input" type="password" name="password" minlength="10" autocomplete="new-password" required />
+        </label>
+        <label class="field">
+          <span class="field-label">Role</span>
+          <select class="input" name="role">
+            {% for role in roles %}
+            <option value="{{ role }}" {% if role == 'read_only' %}selected{% endif %}>{{ role_labels[role] }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <button class="btn btn-primary" type="submit">Create account</button>
+      </form>
+    </div>
+  </div>
+  <div class="admin-col">
+    <div class="section-label">Role matrix</div>
+    <div class="card admin-panel">
+      <div class="admin-kicker">Permissions by role</div>
+      {% for role in roles %}
+      <div class="role-block">
+        <div class="role-head">
+          <strong>{{ role_labels[role] }}</strong>
+          <span class="admin-mono">{{ role }}</span>
+        </div>
+        <div class="admin-chips">
+          {% for permission in role_permissions[role] | sort %}
+          <span class="admin-chip">{{ permission }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-label">Accounts</div>
+  <div class="account-grid">
+    {% for account in accounts %}
+    <div class="card admin-panel account-card">
+      <div class="admin-panel-head">
+        <div>
+          <div class="admin-engine-title">{{ account.username }}</div>
+          <div class="admin-list-sub">
+            Created {{ account.created_at.replace('T', ' ') }} UTC
+            {% if account.last_login_at %} &middot; last login {{ account.last_login_at.replace('T', ' ') }}{% endif %}
+          </div>
+        </div>
+        <span class="admin-status-pill {{ 'is-ok' if account.active else 'is-down' }}">
+          {{ 'Active' if account.active else 'Disabled' }}
+        </span>
+      </div>
+      <div class="admin-chips account-chips">
+        <span class="admin-chip"><span>role</span><strong>{{ role_labels.get(account.role, account.role) }}</strong></span>
+        <span class="admin-chip"><span>2FA</span><strong>{{ 'on' if account.totp_enabled else 'off' }}</strong></span>
+        {% if account.username.lower() == primary_username.lower() %}
+        <span class="admin-chip is-protected"><span>primary</span><strong>env protected</strong></span>
+        {% endif %}
+      </div>
+      {% if account.username.lower() == primary_username.lower() %}
+      <p class="admin-muted admin-muted-top">
+        This account is controlled by <code>MAKROTIK_ADMIN_USER</code> and
+        <code>MAKROTIK_ADMIN_PASSWORD</code>. Manage its password in
+        <code>.env</code> and restart the app.
+      </p>
+      {% else %}
+      <form method="post" action="{{ url_for('admin_update_account', account_id=account.id) }}" class="admin-form account-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <div class="account-form-row">
+          <label class="field">
+            <span class="field-label">Role</span>
+            <select class="input" name="role">
+              {% for role in roles %}
+              <option value="{{ role }}" {% if role == account.role %}selected{% endif %}>{{ role_labels[role] }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">Reset password</span>
+            <input class="input" type="password" name="password" minlength="10" autocomplete="new-password" placeholder="leave blank to keep" />
+          </label>
+        </div>
+        <label class="check-field">
+          <input type="checkbox" name="active" {% if account.active %}checked{% endif %} />
+          <span>Account active</span>
+        </label>
+        <div class="btn-row">
+          <button class="btn btn-secondary btn-sm" type="submit">Save changes</button>
+          {% if account.id != current_account_id %}
+          <button class="btn btn-danger btn-sm" type="submit"
+                  formaction="{{ url_for('admin_delete_account', account_id=account.id) }}"
+                  formmethod="post"
+                  onclick="return confirm('Delete {{ account.username }}? This cannot be undone.');">
+            Delete
+          </button>
+          {% endif %}
+        </div>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

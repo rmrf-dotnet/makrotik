@@ -1,0 +1,117 @@
+{% extends "admin/base.html" %}
+{% block title %}Lifecycle — Makrotik Admin{% endblock %}
+{% block topbar %}Lifecycle{% endblock %}
+
+{% block content %}
+<header class="hero hero-compact admin-hero">
+  <p class="page-eyebrow">Control room / retention policy</p>
+  <h1 class="page-title">Archive by rule.<br /><strong>Never by accident.</strong></h1>
+  <p class="page-sub">
+    Lifecycle rules only soft-archive files. Bytes remain on disk and can be
+    restored until an explicit purge. Rules are evaluated against active files
+    when you run them, and hourly by the background scheduler.
+  </p>
+</header>
+
+<section class="section admin-two-col">
+  <div class="admin-col">
+    <div class="section-label">Create rule</div>
+    <div class="card admin-panel">
+      {% if can_manage %}
+      <form method="post" action="{{ url_for('admin_create_lifecycle_rule') }}" class="admin-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <label class="field">
+          <span class="field-label">Rule name</span>
+          <input class="input" type="text" name="name" placeholder="Archive after 90 days" required />
+        </label>
+        <label class="field">
+          <span class="field-label">Condition</span>
+          <select class="input" name="condition_type">
+            {% for condition in condition_types %}
+            <option value="{{ condition }}">{{ condition }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="field">
+          <span class="field-label">Value</span>
+          <input class="input" type="text" name="condition_value" placeholder="90, project-x, or 500" required />
+        </label>
+        <p class="admin-muted">
+          <code>age_days</code> matches files created at least N days ago.
+          <code>tag</code> matches an exact tag. <code>size_mb</code> matches
+          files at least N MB. The only action is safe archive.
+        </p>
+        <button class="btn btn-primary" type="submit">Create lifecycle rule</button>
+      </form>
+      {% else %}
+      <p class="admin-muted">Your role can view lifecycle rules but not change them.</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="admin-col">
+    <div class="section-label">Current state</div>
+    <div class="card admin-panel">
+      <dl class="admin-kv">
+        <div><dt>Active files</dt><dd>{{ active }}</dd></div>
+        <div><dt>Tagged files</dt><dd>{{ tagged }}</dd></div>
+        <div><dt>Rules</dt><dd>{{ rules | length }}</dd></div>
+      </dl>
+      {% if can_manage %}
+      <form method="post" action="{{ url_for('admin_run_lifecycle') }}" class="admin-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <button class="btn btn-secondary" type="submit">Run lifecycle rules now</button>
+      </form>
+      {% endif %}
+      <p class="admin-muted admin-muted-top">
+        Archived files appear under Records &amp; files with reason
+        <code>lifecycle:&lt;rule&gt;</code>. Restore them there if needed.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-label">Rules</div>
+  <div class="card admin-table-card">
+    {% if rules %}
+    <div class="admin-table admin-lifecycle-table">
+      <div class="admin-tr admin-th">
+        <span>Name</span><span>Condition</span><span>Value</span><span>Action</span><span>Last run</span><span>Status</span><span>Controls</span>
+      </div>
+      {% for rule in rules %}
+      <div class="admin-tr">
+        <span>{{ rule.name }}</span>
+        <span><span class="admin-action-badge">{{ rule.condition_type }}</span></span>
+        <span class="admin-mono">{{ rule.condition_value }}</span>
+        <span>{{ rule.action }}</span>
+        <span class="admin-mono">{{ rule.last_run_at.replace('T', ' ') if rule.last_run_at else 'never' }}</span>
+        <span>
+          <span class="admin-status-pill {{ 'is-ok' if rule.enabled else 'is-archived' }}">
+            {{ 'Enabled' if rule.enabled else 'Paused' }}
+          </span>
+        </span>
+        <span class="admin-row-actions">
+          {% if can_manage %}
+          <form method="post" action="{{ url_for('admin_toggle_lifecycle_rule', rule_id=rule.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <button class="btn btn-ghost btn-sm" type="submit">{{ 'Pause' if rule.enabled else 'Enable' }}</button>
+          </form>
+          <form method="post" action="{{ url_for('admin_delete_lifecycle_rule', rule_id=rule.id) }}"
+                onsubmit="return confirm('Delete this lifecycle rule?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+          </form>
+          {% else %}—{% endif %}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">
+      <div class="empty-title">No lifecycle rules</div>
+      <p class="empty-sub">Create a rule to archive files by age, tag or size.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

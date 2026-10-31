@@ -1,0 +1,70 @@
+{% extends "admin/base.html" %}
+{% block title %}Admin sessions — Makrotik Admin{% endblock %}
+{% block topbar %}Admin sessions{% endblock %}
+
+{% block content %}
+<header class="hero hero-compact admin-hero">
+  <p class="page-eyebrow">Control room / active access</p>
+  <h1 class="page-title">See every session.<br /><strong>Revoke instantly.</strong></h1>
+  <p class="page-sub">
+    Admin sessions are server-side records with an expiry. Revoking a session
+    invalidates the browser cookie on its next request, even if the cookie was
+    copied.
+  </p>
+</header>
+
+<section class="section">
+  <div class="admin-toolbar">
+    <div class="admin-kicker">Sessions</div>
+    <form method="post" action="{{ url_for('admin_revoke_other_sessions') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <button class="btn btn-danger btn-sm" type="submit">Revoke all my other sessions</button>
+    </form>
+  </div>
+  <div class="card admin-table-card">
+    {% if sessions %}
+    <div class="admin-table admin-sessions-table">
+      <div class="admin-tr admin-th">
+        <span>Account</span><span>Role</span><span>Created</span><span>Last seen</span><span>Expires</span><span>IP</span><span>Status</span><span>Action</span>
+      </div>
+      {% for item in sessions %}
+      <div class="admin-tr">
+        <span>
+          {{ item.username }}
+          {% if item.id == current_token %}<span class="admin-status-pill is-ok">this session</span>{% endif %}
+        </span>
+        <span><span class="admin-action-badge">{{ item.role }}</span></span>
+        <span class="admin-mono">{{ item.created_at.replace('T', ' ') }}</span>
+        <span class="admin-mono">{{ item.last_seen.replace('T', ' ') }}</span>
+        <span class="admin-mono">{{ item.expires_at.replace('T', ' ') }}</span>
+        <span class="admin-mono">{{ item.ip or '—' }}</span>
+        <span>
+          {% if item.revoked_at %}
+          <span class="admin-status-pill is-down">Revoked</span>
+          {% elif item.expires_at < now %}
+          <span class="admin-status-pill is-archived">Expired</span>
+          {% else %}
+          <span class="admin-status-pill is-ok">Active</span>
+          {% endif %}
+        </span>
+        <span>
+          {% if not item.revoked_at %}
+          <form method="post" action="{{ url_for('admin_revoke_session', session_id=item.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <button class="btn btn-danger btn-sm" type="submit">Revoke</button>
+          </form>
+          {% else %}—{% endif %}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="admin-table-note">Revoked and expired records are pruned when this page loads.</p>
+    {% else %}
+    <div class="empty">
+      <div class="empty-title">No admin sessions</div>
+      <p class="empty-sub">Sign in to create a server-side session record.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

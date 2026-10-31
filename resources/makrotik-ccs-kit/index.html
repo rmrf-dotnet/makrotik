@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Micro-Transition</title>
+    <link rel="stylesheet" href="./style.css">
+
+  </head>
+    
+  <body>
+  <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Micro-Transition Stack — Component Boilerplate</title>
+  </head>
+  <body>
+    <div class="page">
+      <!-- ── HEADER ── -->
+      <header style="margin-bottom: 72px">
+        <p class="page-eyebrow">CSS Component System</p>
+        <h1 class="page-title">Micro-Transition<br /><strong>Stack</strong></h1>
+        <p class="page-sub">
+          Every easing curve, duration, and interactive state. Ready to drop
+          into production. No libraries. Pure CSS custom properties.
+        </p>
+      </header>
+
+      <!-- ── 01: EASING CURVES ── -->
+      <section class="section">
+        <div class="section-label">01 &mdash; Easing Curves</div>
+        <div class="grid-4" id="ease-grid">
+          <div class="ease-card">
+            <div class="ease-name">Enter</div>
+            <div class="ease-track">
+              <div
+                class="ease-ball"
+                id="eb-enter"
+                style="transition-timing-function: var(--ease-enter)"
+              ></div>
+            </div>
+            <div class="ease-value">cubic-bezier<br />(0.0, 0.0, 0.2, 1.0)</div>
+          </div>
+          <div class="ease-card">
+            <div class="ease-name">Exit</div>
+            <div class="ease-track">
+              <div
+                class="ease-ball"
+                id="eb-exit"
+                style="transition-timing-function: var(--ease-exit)"
+              ></div>
+            </div>
+            <div class="ease-value">cubic-bezier<br />(0.4, 0.0, 1.0, 1.0)</div>
+          </div>
+          <div class="ease-card">
+            <div class="ease-name">Standard</div>
+            <div class="ease-track">
+              <div
+                class="ease-ball"
+                id="eb-standard"
+                style="transition-timing-function: var(--ease-standard)"
+              ></div>
+            </div>
+            <div class="ease-value">cubic-bezier<br />(0.4, 0.0, 0.2, 1.0)</div>
+          </div>
+          <div class="ease-card">
+            <div class="ease-name">Spring</div>
+            <div class="ease-track">
+              <div
+                class="ease-ball"
+                id="eb-spring"
+                style="transition-timing-function: var(--ease-spring)"
+              ></div>
+            </div>
+            <div class="ease-value">
+              cubic-bezier<br />(0.34, 1.56, 0.64, 1.0)
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- ── 02: DURATION SCALE ── -->
+      <section class="section">
+        <div class="section-label">02 &mdash; Duration Scale</div>
+        <div style="display: flex; flex-direction: column; gap: 14px">
+          <div class="dur-row">
+            <div class="dur-name">Micro</div>
+            <div class="dur-track">
+              <div class="dur-fill" style="width: 10%"></div>
+            </div>
+            <div class="dur-ms">80ms</div>
+          </div>
+          <div class="dur-row">
+            <div class="dur-name">Fast</div>
+            <div class="dur-track">
+              <div class="dur-fill" style="width: 22%"></div>
+            </div>
+            <div class="dur-ms">120ms</div>
+          </div>
+          <div class="dur-row">
+            <div class="dur-name">Standard</div>
+            <div class="dur-track">
+              <div class="dur-fill" style="width: 42%"></div>
+            </div>
+            <div class="dur-ms">200ms</div>
+          </div>
+          <div class="dur-row">
+            <div class="dur-name">Moderate</div>
+            <div class="dur-track">
+              <div class="dur-fill" style="width: 62%"></div>
+            </div>
+            <div class="dur-ms">280ms</div>
+          </div>
+          <div class="dur-row">
+            <div class="dur-name">Slow</div>
+            <div class="dur-track">
+              <div class="dur-fill" style="width: 100%"></div>
+            </div>
+            <div class="dur-ms">400ms</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- ── 03: BUTTONS ── -->
+      <section class="section">
+        <div class="section-label">03 &mdash; Buttons</div>
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          <div class="btn-row">
+            <button class="btn btn-primary">Primary action</button>
+            <button class="btn btn-secondary">
+              Secondary
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              >
+                <polyline points="3,4.5 6,7.5 9,4.5" />
+              </svg>
+            </button>
+            <button class="btn btn-ghost">Ghost</button>
+            <button class="btn btn-danger">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              >
+                <path d="M2.5 3.5h9M5 3.5V2h4v1.5M4.5 3.5l.5 8h5l.5-8" />
+              </svg>
+              Destructive
+            </button>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-icon" aria-label="Edit">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 15 15"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M10.5 2l2.5 2.5-8.5 8.5H2v-2.5L10.5 2z" />
+              </svg>
+            </button>
+            <button class="btn-icon" aria-label="Copy">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 15 15"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              >
+                <rect x="5" y="5" width="7" height="7" rx="1.5" />
+                <path d="M3 10V3h7" />
+              </svg>
+            </button>
+            <button class="btn-icon" aria-label="Search">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 15 15"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              >
+                <circle cx="6.5" cy="6.5" r="4" />
+                <path d="M11 11l2.5 2.5" />
+              </svg>
+            </button>
+            <button class="btn-icon" aria-label="Settings">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 15 15"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              >
+                <circle cx="7.5" cy="7.5" r="2" />
+                <path
+                  d="M7.5 1v2M7.5 12v2M1 7.5h2M12 7.5h2M3.2 3.2l1.4 1.4M10.4 10.4l1.4 1.4M10.4 4.6l-1.4 1.4M4.6 10.4L3.2 11.8"
+                />
+              </svg>
+            </button>
+            <button class="btn-icon" aria-label="Add">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 15 15"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              >
+                <path d="M7.5 2v11M2 7.5h11" />
+              </svg>
+            </button>
+
+            <!-- Tooltip demo -->
+            <span class="tooltip-anchor" style="margin-left: 8px">
+              <button class="btn btn-secondary">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                >
+                  <circle cx="7" cy="7" r="5.5" />
+                  <path d="M7 6.5V9.5M7 4.5v.5" />
+                </svg>
+                Hover for tooltip
+              </button>
+              <span class="tooltip">Appears after 400ms of intent</span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- ── 04: CARDS ── -->
+      <section class="section">
+        <div class="section-label">04 &mdash; Cards</div>
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-eyebrow">Revenue</div>
+            <div class="card-title">$48,291</div>
+            <div class="card-body">
+              Monthly recurring revenue, up 12% from the previous period.
+            </div>
+            <span class="card-badge">Live</span>
+          </div>
+          <div class="card">
+            <div class="card-eyebrow">Uptime</div>
+            <div class="card-title">99.98%</div>
+            <div class="card-body">
+              All systems operational. Last incident was 47 days ago.
+            </div>
+            <span class="card-badge">Stable</span>
+          </div>
+          <div class="card">
+            <div class="card-eyebrow">Active Users</div>
+            <div class="card-title">14,832</div>
+            <div class="card-body">
+              Active accounts this month. Retention holding at 94%.
+            </div>
+            <span class="card-badge">Growing</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- ── 05: INTERACTIVE STATES ── -->
+      <section class="section">
+        <div class="section-label">05 &mdash; Interactive States</div>
+        <div class="state-grid">
+          <div class="state-card">
+            <div class="state-label">Hover</div>
+            <div class="state-num">–2px</div>
+            <div class="state-sub">lift + shadow expand</div>
+          </div>
+          <div class="state-card">
+            <div class="state-label">Active</div>
+            <div class="state-num">+2px</div>
+            <div class="state-sub">press down, 60ms snap</div>
+          </div>
+          <div class="state-card">
+            <div class="state-label">Focus</div>
+            <div class="state-num">3px</div>
+            <div class="state-sub">ring with brand tint</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- ── 06: FORM ELEMENTS ── -->
+      <section class="section">
+        <div class="section-label">06 &mdash; Form Elements</div>
+        <div style="display: flex; flex-direction: column; gap: 28px">
+          <div class="grid-2">
+            <div class="field">
+              <label class="field-label">Email address</label>
+              <input class="input" type="email" placeholder="you@domain.com" />
+            </div>
+            <div class="field">
+              <label class="field-label">API key</label>
+              <input
+                class="input"
+                type="password"
+                placeholder="sk-••••••••••••"
+              />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label class="field-label">Workspace name</label>
+              <input class="input" type="text" placeholder="Acme Corp" />
+            </div>
+            <div class="field">
+              <label class="field-label">Invite by email</label>
+              <input class="input" type="email" placeholder="team@domain.com" />
+            </div>
+          </div>
+
+          <div
+            style="
+              display: flex;
+              gap: 40px;
+              align-items: center;
+              flex-wrap: wrap;
+            "
+          >
+            <label class="toggle-wrap">
+              <span class="toggle">
+                <input type="checkbox" id="tgl-1" />
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </span>
+              <span class="toggle-label">Enable notifications</span>
+            </label>
+            <label class="toggle-wrap">
+              <span class="toggle">
+                <input type="checkbox" id="tgl-2" checked />
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </span>
+              <span class="toggle-label">Auto-save drafts</span>
+            </label>
+            <label class="toggle-wrap">
+              <span class="toggle">
+                <input type="checkbox" id="tgl-3" />
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </span>
+              <span class="toggle-label">Two-factor auth</span>
+            </label>
+          </div>
+
+          <div style="display: flex; gap: 24px; flex-wrap: wrap">
+            <div class="checkbox-wrap" onclick="toggleCb(this)">
+              <div class="checkbox is-checked">
+                <svg
+                  width="10"
+                  height="8"
+                  viewBox="0 0 10 8"
+                  fill="none"
+                  stroke="#fff"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="1,4 4,7 9,1" />
+                </svg>
+              </div>
+              <span class="checkbox-text">Tinted backgrounds</span>
+            </div>
+            <div class="checkbox-wrap" onclick="toggleCb(this)">
+              <div class="checkbox is-checked">
+                <svg
+                  width="10"
+                  height="8"
+                  viewBox="0 0 10 8"
+                  fill="none"
+                  stroke="#fff"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="1,4 4,7 9,1" />
+                </svg>
+              </div>
+              <span class="checkbox-text">Temperature shadows</span>
+            </div>
+            <div class="checkbox-wrap" onclick="toggleCb(this)">
+              <div class="checkbox">
+                <svg
+                  width="10"
+                  height="8"
+                  viewBox="0 0 10 8"
+                  fill="none"
+                  stroke="#fff"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="1,4 4,7 9,1" />
+                </svg>
+              </div>
+              <span class="checkbox-text">Reduced motion</span>
+            </div>
+            <div class="checkbox-wrap" onclick="toggleCb(this)">
+              <div class="checkbox is-checked">
+                <svg
+                  width="10"
+                  height="8"
+                  viewBox="0 0 10 8"
+                  fill="none"
+                  stroke="#fff"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="1,4 4,7 9,1" />
+                </svg>
+              </div>
+              <span class="checkbox-text">Spring easing</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- ── 07: NAV ── -->
+      <section class="section">
+        <div class="section-label">07 &mdash; Navigation Tabs</div>
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          <div class="nav" id="nav-a">
+            <button
+              class="nav-item is-active"
+              onclick="switchNav('nav-a', this)"
+            >
+              Overview
+            </button>
+            <button class="nav-item" onclick="switchNav('nav-a', this)">
+              Analytics
+            </button>
+            <button class="nav-item" onclick="switchNav('nav-a', this)">
+              Settings
+            </button>
+            <button class="nav-item" onclick="switchNav('nav-a', this)">
+              Billing
+            </button>
+          </div>
+          <div class="nav" id="nav-b">
+            <button
+              class="nav-item is-active"
+              onclick="switchNav('nav-b', this)"
+            >
+              Design
+            </button>
+            <button class="nav-item" onclick="switchNav('nav-b', this)">
+              Prototype
+            </button>
+            <button class="nav-item" onclick="switchNav('nav-b', this)">
+              Inspect
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- ── 08: DROPDOWN ── -->
+      <section class="section">
+        <div class="section-label">08 &mdash; Dropdown</div>
+        <div
+          style="
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            padding-bottom: 220px;
+            margin-bottom: -220px;
+          "
+        >
+          <div class="dropdown-wrap">
+            <button
+              class="btn btn-secondary"
+              onclick="toggleDd('dd-1')"
+              id="dd-1-btn"
+            >
+              Options
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              >
+                <polyline points="3,4.5 6,7.5 9,4.5" />
+              </svg>
+            </button>
+            <div class="dropdown" id="dd-1">
+              <div class="dropdown-item">
+                <svg
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M10 2l2 2-7.5 7.5H3v-2L10 2z" />
+                </svg>
+                Edit item
+              </div>
+              <div class="dropdown-item">
+                <svg
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                >
+                  <rect x="4" y="4" width="7" height="7" rx="1.5" />
+                  <path d="M2.5 9.5V2.5h7" />
+                </svg>
+                Duplicate
+              </div>
+              <div class="dropdown-item">
+                <svg
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                >
+                  <circle cx="4" cy="7" r="1.5" />
+                  <circle cx="10" cy="3.5" r="1.5" />
+                  <circle cx="10" cy="10.5" r="1.5" />
+                  <path d="M5.4 6.3l3.2-1.9M5.4 7.7l3.2 1.9" />
+                </svg>
+                Share link
+              </div>
+              <div class="dropdown-item">
+                <svg
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                >
+                  <path d="M2 4h10M2 7h7M2 10h5" />
+                </svg>
+                Move to&hellip;
+              </div>
+              <div class="dropdown-sep"></div>
+              <div class="dropdown-item is-danger">
+                <svg
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                >
+                  <path d="M2.5 3.5h9M5 3.5V2h4v1.5M4.5 3.5l.5 8h5l.5-8" />
+                </svg>
+                Delete
+              </div>
+            </div>
+          </div>
+
+          <div class="dropdown-wrap">
+            <button
+              class="btn btn-primary"
+              onclick="toggleDd('dd-2')"
+              id="dd-2-btn"
+            >
+              New item
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              >
+                <polyline points="3,4.5 6,7.5 9,4.5" />
+              </svg>
+            </button>
+            <div class="dropdown" id="dd-2">
+              <div class="dropdown-item">
+                <svg
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                >
+                  <rect x="2.5" y="2.5" width="9" height="9" rx="1.5" />
+                </svg>
+                New project
+              </div>
+              <div class="dropdown-item">
+                <svg
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                >
+                  <path d="M7 2.5v9M2.5 7h9" />
+                </svg>
+                New document
+              </div>
+              <div class="dropdown-item">
+                <svg
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                >
+                  <rect x="2.5" y="4" width="9" height="7.5" rx="1.5" />
+                  <path d="M5 4V3a2 2 0 0 1 4 0v1" />
+                </svg>
+                Import file
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- ── 09: MODAL ── -->
+      <section class="section">
+        <div class="section-label">09 &mdash; Modal</div>
+        <div style="margin-bottom: 16px">
+          <button class="btn btn-primary" onclick="openModal()">
+            Open modal
+          </button>
+        </div>
+        <div class="modal-backdrop">
+          <div class="modal" id="modal">
+            <div class="modal-icon">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              >
+                <path
+                  d="M3 4.5h12M6.75 4.5v-1.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75v1.5M5.25 4.5l.75 10.5h6l.75-10.5"
+                />
+              </svg>
+            </div>
+            <div class="modal-title">Delete this item permanently?</div>
+            <div class="modal-body">
+              This action cannot be undone. The item will be permanently removed
+              from your workspace and all collaborators will lose access
+              immediately.
+            </div>
+            <div class="modal-actions">
+              <button class="btn btn-ghost" onclick="closeModal()">
+                Cancel
+              </button>
+              <button class="btn btn-danger" onclick="closeModal()">
+                Delete forever
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
+    <script  src="./script.js"></script>
+
+  </body>
+  
+</html>
