@@ -17,7 +17,7 @@ On your server (via PuTTY/SSH):
 ```bash
 sudo apt-get update && sudo apt-get install -y git
 git clone https://github.com/rmrf-dotnet/makrotik.git
-cd YOUR-REPO
+cd makrotik
 sudo bash install.sh
 ```
 
