@@ -16,7 +16,7 @@ On your server (via PuTTY/SSH):
 
 ```bash
 sudo apt-get update && sudo apt-get install -y git
-git clone [https://github.com/YOUR-USER/YOUR-REPO.git](https://github.com/rmrf-dotnet/makrotik.git)
+git clone https://github.com/rmrf-dotnet/makrotik.git
 cd YOUR-REPO
 sudo bash install.sh
 ```
@@ -47,7 +47,7 @@ makrotik shell       # open venv python
 
 ```bash
 sudo apt-get install -y python3 python3-venv python3-pip postgresql postgresql-client git
-git clone [https://github.com/YOUR-USER/YOUR-REPO.git](https://github.com/rmrf-dotnet/makrotik.git) /opt/makrotik
+git clone https://github.com/rmrf-dotnet/makrotik.git
 cd /opt/makrotik
 cp .env.example .env
 # edit .env
